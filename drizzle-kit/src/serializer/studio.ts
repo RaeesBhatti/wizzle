@@ -1,3 +1,4 @@
+import type { PGlite } from '@electric-sql/pglite';
 import { serve } from '@hono/node-server';
 import { zValidator } from '@hono/zod-validator';
 import { createHash } from 'crypto';
@@ -11,14 +12,14 @@ import {
 	Relations,
 	TablesRelationalConfig,
 } from 'drizzle-orm/_relations';
-import { AnyMySqlTable, getTableConfig as mysqlTableConfig, MySqlTable } from 'drizzle-orm/mysql-core';
-import { AnyPgTable, getTableConfig as pgTableConfig, PgTable } from 'drizzle-orm/pg-core';
+import { AnyMySqlTable, MySqlTable, getTableConfig as mysqlTableConfig } from 'drizzle-orm/mysql-core';
+import { AnyPgTable, PgTable, getTableConfig as pgTableConfig } from 'drizzle-orm/pg-core';
 import {
 	AnySingleStoreTable,
-	getTableConfig as singlestoreTableConfig,
 	SingleStoreTable,
+	getTableConfig as singlestoreTableConfig,
 } from 'drizzle-orm/singlestore-core';
-import { AnySQLiteTable, getTableConfig as sqliteTableConfig, SQLiteTable } from 'drizzle-orm/sqlite-core';
+import { AnySQLiteTable, SQLiteTable, getTableConfig as sqliteTableConfig } from 'drizzle-orm/sqlite-core';
 import fs from 'fs';
 import { Hono } from 'hono';
 import { compress } from 'hono/compress';
@@ -28,13 +29,13 @@ import { CasingType } from 'src/cli/validations/common';
 import { LibSQLCredentials } from 'src/cli/validations/libsql';
 import { assertUnreachable } from 'src/global';
 import { z } from 'zod';
+import { prepareFilenames } from '.';
 import { safeRegister } from '../cli/commands/utils';
 import type { MysqlCredentials } from '../cli/validations/mysql';
 import type { PostgresCredentials } from '../cli/validations/postgres';
 import type { SingleStoreCredentials } from '../cli/validations/singlestore';
 import type { SqliteCredentials } from '../cli/validations/sqlite';
 import type { Proxy, TransactionProxy } from '../utils';
-import { prepareFilenames } from '.';
 import { getColumnCasing } from './utils';
 
 type CustomDefault = {
@@ -273,7 +274,10 @@ const getCustomDefaults = <T extends AnyTable<{}>>(
 };
 
 export const drizzleForPostgres = async (
-	credentials: PostgresCredentials,
+	credentials: PostgresCredentials | {
+		driver: 'pglite';
+		client: PGlite;
+	},
 	pgSchema: Record<string, Record<string, AnyPgTable>>,
 	relations: Record<string, Relations>,
 	schemaFiles?: SchemaFile[],
@@ -290,7 +294,7 @@ export const drizzleForPostgres = async (
 		if (driver === 'aws-data-api') {
 			dbUrl = `aws-data-api://${credentials.database}/${credentials.secretArn}/${credentials.resourceArn}`;
 		} else if (driver === 'pglite') {
-			dbUrl = credentials.url;
+			dbUrl = 'client' in credentials ? credentials.client.dataDir || 'pglite://custom-client' : credentials.url;
 		} else {
 			assertUnreachable(driver);
 		}
