@@ -1,4 +1,5 @@
 import { is } from 'drizzle-orm';
+import { Relations } from 'drizzle-orm/_relations';
 import {
 	AnyPgTable,
 	isPgEnum,
@@ -15,7 +16,6 @@ import {
 	PgView,
 } from 'drizzle-orm/pg-core';
 import { safeRegister } from '../cli/commands/utils';
-import { Relations } from 'drizzle-orm/_relations';
 
 export const prepareFromExports = (exports: Record<string, unknown>) => {
 	const tables: AnyPgTable[] = [];
@@ -100,5 +100,15 @@ export const prepareFromPgImports = async (imports: string[]) => {
 	}
 	unregister();
 
-	return { tables: Array.from(new Set(tables)), enums, schemas, sequences, views, matViews, roles, policies, relations };
+	return {
+		tables: Array.from(new Set(tables)),
+		enums,
+		schemas,
+		sequences,
+		views,
+		matViews,
+		roles,
+		policies,
+		relations,
+	};
 };
