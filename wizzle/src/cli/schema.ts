@@ -11,6 +11,7 @@ import { assertV1OutFolder } from '../utils';
 import { certs } from '../utils/certs';
 import { checkHandler } from './commands/check';
 import { dropMigration } from './commands/drop';
+import { migrateFromJournal } from './commands/migrate-from-journal';
 import { upMysqlHandler } from './commands/mysqlUp';
 import { upPgHandler } from './commands/pgUp';
 import { upSinglestoreHandler } from './commands/singlestoreUp';
@@ -646,6 +647,23 @@ export const drop = command({
 
 		assertV1OutFolder(config.out);
 		await dropMigration(config);
+	},
+});
+
+export const migrateFromJournalCommand = command({
+	name: 'migrate-from-journal',
+	desc: 'Migrate from journal-based to folder-based migration structure',
+	options: {
+		out: optionOut.default('drizzle'),
+		dryRun: boolean()
+			.desc('Show what would be migrated without making changes')
+			.default(false),
+	},
+	handler: async (opts) => {
+		await migrateFromJournal({
+			out: opts.out,
+			dryRun: opts.dryRun,
+		});
 	},
 });
 
