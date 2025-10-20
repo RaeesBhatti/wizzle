@@ -14,20 +14,17 @@ export const dropMigration = async ({
 	out: string;
 	bundle: boolean;
 }) => {
-	const metaFolder = join(out, 'meta');
-	const orderedSnapshots = buildSnapshotChain(metaFolder);
+	const orderedTags = buildSnapshotChain(out);
 
-	if (orderedSnapshots.length === 0) {
+	if (orderedTags.length === 0) {
 		console.log(
-			`[${chalk.blue('i')}] no migration snapshots found in ${metaFolder}`,
+			`[${chalk.blue('i')}] no migration folders found in ${out}`,
 		);
 		return;
 	}
 
-	// Convert snapshot paths to entries for the view
-	const entries = orderedSnapshots.map((snapshotPath, idx) => {
-		const filename = basename(snapshotPath, '.json');
-		const tag = filename.replace('_snapshot', '');
+	// Convert tags to entries for the view
+	const entries = orderedTags.map((tag, idx) => {
 		return {
 			idx,
 			tag,
@@ -39,11 +36,10 @@ export const dropMigration = async ({
 	if (result.status === 'aborted') return;
 
 	const selectedTag = result.data.tag;
-	const snapshotFilePath = join(metaFolder, `${selectedTag}_snapshot.json`);
-	const sqlFilePath = join(out, `${selectedTag}.sql`);
+	const migrationFolderPath = join(out, selectedTag);
 
-	rmSync(snapshotFilePath);
-	rmSync(sqlFilePath);
+	// Delete entire migration folder
+	rmSync(migrationFolderPath, { recursive: true });
 
 	if (bundle) {
 		fs.writeFileSync(

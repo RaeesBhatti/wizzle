@@ -472,7 +472,7 @@ export class IntrospectProgress extends TaskView {
 		this.timeout = setInterval(() => {
 			this.spinner.tick();
 			this.requestLayout();
-		}, 128);
+		}, 128) as unknown as NodeJS.Timeout;
 
 		this.on('detach', () => clearInterval(this.timeout));
 	}
@@ -535,7 +535,7 @@ export class MigrateProgress extends TaskView {
 		this.timeout = setInterval(() => {
 			this.spinner.tick();
 			this.requestLayout();
-		}, 128);
+		}, 128) as unknown as NodeJS.Timeout;
 
 		this.on('detach', () => clearInterval(this.timeout));
 	}
@@ -561,7 +561,7 @@ export class ProgressView extends TaskView {
 		this.timeout = setInterval(() => {
 			this.spinner.tick();
 			this.requestLayout();
-		}, 128);
+		}, 128) as unknown as NodeJS.Timeout;
 
 		this.on('detach', () => clearInterval(this.timeout));
 	}

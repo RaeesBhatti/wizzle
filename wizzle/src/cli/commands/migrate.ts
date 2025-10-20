@@ -41,7 +41,7 @@ import {
 	TablePolicyResolverInput,
 	TablePolicyResolverOutput,
 } from '../../snapshotsDiffer';
-import { assertV1OutFolder, prepareMigrationFolder } from '../../utils';
+import { assertV1OutFolder, buildSnapshotChain, prepareMigrationFolder } from '../../utils';
 import { prepareMigrationMetadata } from '../../utils/words';
 import { CasingType, Driver } from '../validations/common';
 import { withStyle } from '../validations/outputs';
@@ -1367,17 +1367,19 @@ export const writeResult = ({
 		}
 	}
 
-	// append snapshot file to meta folder
-	// append sql file to out folder
+	// Create migration in folder-based structure
 	const { prefix, tag } = prepareMigrationMetadata(name);
 
 	const toSave = JSON.parse(JSON.stringify(cur));
 	toSave['_meta'] = _meta;
 
-	const metaFolderPath = join(outFolder, 'meta');
+	// Create migration folder: <outFolder>/<tag>/
+	const migrationFolderPath = join(outFolder, tag);
+	fs.mkdirSync(migrationFolderPath, { recursive: true });
 
+	// Write snapshot to: <outFolder>/<tag>/snapshot.json
 	fs.writeFileSync(
-		join(metaFolderPath, `${prefix}_snapshot.json`),
+		join(migrationFolderPath, 'snapshot.json'),
 		JSON.stringify(toSave, null, 2),
 	);
 
@@ -1394,7 +1396,8 @@ export const writeResult = ({
 		sql = '-- Custom SQL migration file, put your code below! --';
 	}
 
-	fs.writeFileSync(`${outFolder}/${tag}.sql`, sql);
+	// Write SQL to: <outFolder>/<tag>/up.sql
+	fs.writeFileSync(join(migrationFolderPath, 'up.sql'), sql);
 
 	// js file with .sql imports for React Native / Expo and Durable Sqlite Objects
 	if (bundle) {
@@ -1409,30 +1412,26 @@ export const writeResult = ({
 			)
 		}] Your SQL migration file ➜ ${
 			chalk.bold.underline.blue(
-				path.join(`${outFolder}/${tag}.sql`),
+				path.join(migrationFolderPath, 'up.sql'),
 			)
 		} 🚀`,
 	);
 };
 
 export const embeddedMigrations = (outFolder: string, driver?: Driver) => {
-	const metaFolder = join(outFolder, 'meta');
-	const { buildSnapshotChain } = require('../../utils');
-	const orderedSnapshots: string[] = buildSnapshotChain(metaFolder);
+	const orderedTags: string[] = buildSnapshotChain(outFolder);
 
 	let content = driver === 'expo'
 		? '// This file is required for Expo/React Native SQLite migrations - https://orm.drizzle.team/quick-sqlite/expo\n\n'
 		: '';
 
-	orderedSnapshots.forEach((snapshotPath, idx) => {
-		// Extract tag from snapshot filename (remove path and _snapshot.json suffix)
-		const filename = path.basename(snapshotPath, '.json');
-		const tag = filename.replace('_snapshot', '');
-		content += `import m${idx.toString().padStart(4, '0')} from './${tag}.sql';\n`;
+	orderedTags.forEach((tag, idx) => {
+		// Tags are now folder names directly
+		content += `import m${idx.toString().padStart(4, '0')} from './${tag}/up.sql';\n`;
 	});
 
 	content += `\n  export default {\n    migrations: {\n`;
-	orderedSnapshots.forEach((_, idx) => {
+	orderedTags.forEach((_, idx) => {
 		content += `      m${idx.toString().padStart(4, '0')},\n`;
 	});
 	content += `    }\n  }\n  `;

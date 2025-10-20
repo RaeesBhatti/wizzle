@@ -77,6 +77,11 @@ export const assertV1OutFolder = (out: string) => {
  * to prevent potential data conflicts. This requires analyzing the snapshot diffs.
  */
 export const buildSnapshotChain = (migrationsFolder: string): string[] => {
+	// Check if migrations folder exists
+	if (!existsSync(migrationsFolder)) {
+		return [];
+	}
+
 	// Extract timestamp from folder name (format: <timestamp>_<name>)
 	const getTimestamp = (folderName: string): number => {
 		const match = folderName.match(/^(\d+)_/);
