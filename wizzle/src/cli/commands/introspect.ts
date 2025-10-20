@@ -118,9 +118,9 @@ export const introspectPostgres = async (
 	writeFileSync(relationsFile, relationsTs.file);
 	console.log();
 
-	const { snapshots } = prepareOutFolder(out, 'postgresql');
+	const { migrationTags } = prepareOutFolder(out, 'postgresql');
 
-	if (snapshots.length === 0) {
+	if (migrationTags.length === 0) {
 		const { sqlStatements, _meta } = await applyPgSnapshotsDiff(
 			squashPgScheme(dryPg),
 			squashPgScheme(schema),
@@ -359,9 +359,9 @@ export const introspectMysql = async (
 	writeFileSync(relationsFile, relationsTs.file);
 	console.log();
 
-	const { snapshots } = prepareOutFolder(out, 'mysql');
+	const { migrationTags } = prepareOutFolder(out, 'mysql');
 
-	if (snapshots.length === 0) {
+	if (migrationTags.length === 0) {
 		const { sqlStatements, _meta } = await applyMysqlSnapshotsDiff(
 			squashMysqlScheme(dryMySql),
 			squashMysqlScheme(schema),
@@ -465,9 +465,9 @@ export const introspectSingleStore = async (
 	writeFileSync(schemaFile, ts.file);
 	console.log();
 
-	const { snapshots } = prepareOutFolder(out, 'singlestore');
+	const { migrationTags } = prepareOutFolder(out, 'singlestore');
 
-	if (snapshots.length === 0) {
+	if (migrationTags.length === 0) {
 		const { sqlStatements, _meta } = await applySingleStoreSnapshotsDiff(
 			squashSingleStoreScheme(drySingleStore),
 			squashSingleStoreScheme(schema),
@@ -564,9 +564,9 @@ export const introspectSqlite = async (
 	writeFileSync(relationsFile, relationsTs.file);
 	console.log();
 
-	const { snapshots } = prepareOutFolder(out, 'sqlite');
+	const { migrationTags } = prepareOutFolder(out, 'sqlite');
 
-	if (snapshots.length === 0) {
+	if (migrationTags.length === 0) {
 		const { sqlStatements, _meta } = await applySqliteSnapshotsDiff(
 			squashSqliteScheme(drySQLite),
 			squashSqliteScheme(schema),
@@ -674,9 +674,9 @@ export const introspectLibSQL = async (
 	writeFileSync(relationsFile, relationsTs.file);
 	console.log();
 
-	const { snapshots } = prepareOutFolder(out, 'sqlite');
+	const { migrationTags } = prepareOutFolder(out, 'sqlite');
 
-	if (snapshots.length === 0) {
+	if (migrationTags.length === 0) {
 		const { sqlStatements, _meta } = await applyLibSQLSnapshotsDiff(
 			squashSqliteScheme(drySQLite),
 			squashSqliteScheme(schema),

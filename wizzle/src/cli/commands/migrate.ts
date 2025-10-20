@@ -307,13 +307,13 @@ export const prepareAndMigratePg = async (config: GenerateConfig) => {
 	try {
 		assertV1OutFolder(outFolder);
 
-		const { snapshots } = prepareMigrationFolder(
+		const { migrationTags } = prepareMigrationFolder(
 			outFolder,
 			'postgresql',
 		);
 
 		const { prev, cur, custom } = await preparePgMigrationSnapshot(
-			snapshots,
+			migrationTags,
 			schemaPath,
 			casing,
 		);
@@ -529,9 +529,9 @@ export const prepareAndMigrateMysql = async (config: GenerateConfig) => {
 		// TODO: remove
 		assertV1OutFolder(outFolder);
 
-		const { snapshots } = prepareMigrationFolder(outFolder, 'mysql');
+		const { migrationTags } = prepareMigrationFolder(outFolder, 'mysql');
 		const { prev, cur, custom } = await prepareMySqlMigrationSnapshot(
-			snapshots,
+			migrationTags,
 			schemaPath,
 			casing,
 		);
@@ -675,9 +675,9 @@ export const prepareAndMigrateSingleStore = async (config: GenerateConfig) => {
 		// TODO: remove
 		assertV1OutFolder(outFolder);
 
-		const { snapshots } = prepareMigrationFolder(outFolder, 'singlestore');
+		const { migrationTags } = prepareMigrationFolder(outFolder, 'singlestore');
 		const { prev, cur, custom } = await prepareSingleStoreMigrationSnapshot(
-			snapshots,
+			migrationTags,
 			schemaPath,
 			casing,
 		);
@@ -795,9 +795,9 @@ export const prepareAndMigrateSqlite = async (config: GenerateConfig) => {
 	try {
 		assertV1OutFolder(outFolder);
 
-		const { snapshots } = prepareMigrationFolder(outFolder, 'sqlite');
+		const { migrationTags } = prepareMigrationFolder(outFolder, 'sqlite');
 		const { prev, cur, custom } = await prepareSqliteMigrationSnapshot(
-			snapshots,
+			migrationTags,
 			schemaPath,
 			casing,
 		);
@@ -886,9 +886,9 @@ export const prepareAndMigrateLibSQL = async (config: GenerateConfig) => {
 	try {
 		assertV1OutFolder(outFolder);
 
-		const { snapshots } = prepareMigrationFolder(outFolder, 'sqlite');
+		const { migrationTags } = prepareMigrationFolder(outFolder, 'sqlite');
 		const { prev, cur, custom } = await prepareSqliteMigrationSnapshot(
-			snapshots,
+			migrationTags,
 			schemaPath,
 			casing,
 		);

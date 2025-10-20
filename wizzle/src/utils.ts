@@ -64,53 +64,58 @@ export const assertV1OutFolder = (out: string) => {
  * Builds an ordered chain of migration snapshots by following prevId references.
  *
  * Algorithm:
- * 1. List all snapshot JSON files in meta/ folder
+ * 1. List all migration folders containing snapshot.json files
  * 2. Find root snapshot (prevId === originUUID or empty)
  * 3. Build chain by following prevId references
- * 4. If multiple snapshots have same prevId, sort by timestamp from filename
+ * 4. If multiple snapshots have same prevId, sort by timestamp from folder name
  *
- * @param metaFolder - Path to the meta folder containing snapshots
- * @returns Ordered array of snapshot paths from oldest to newest
+ * @param migrationsFolder - Path to the migrations folder containing migration subfolders
+ * @returns Ordered array of migration folder paths (tags) from oldest to newest
  *
  * TODO: Future enhancement - detect if concurrent migrations modified same schema entities.
  * If two migrations with same prevId touch the same tables/columns, we should show an error
  * to prevent potential data conflicts. This requires analyzing the snapshot diffs.
  */
-export const buildSnapshotChain = (metaFolder: string): string[] => {
-	// Extract timestamp from filename (format: <timestamp>_snapshot.json)
-	const getTimestamp = (filename: string): number => {
-		const match = filename.match(/^(\d+)_/);
+export const buildSnapshotChain = (migrationsFolder: string): string[] => {
+	// Extract timestamp from folder name (format: <timestamp>_<name>)
+	const getTimestamp = (folderName: string): number => {
+		const match = folderName.match(/^(\d+)_/);
 		return match ? parseInt(match[1]) : 0;
 	};
 
-	// Read all JSON files except _journal.json
-	const files = readdirSync(metaFolder)
-		.filter((file) => file.endsWith('.json') && !file.startsWith('_'))
-		.map((file) => join(metaFolder, file));
+	// Read all directories that contain a snapshot.json file
+	const folders = readdirSync(migrationsFolder, { withFileTypes: true })
+		.filter((dirent) => dirent.isDirectory())
+		.map((dirent) => dirent.name)
+		.filter((folderName) => {
+			const snapshotPath = join(migrationsFolder, folderName, 'snapshot.json');
+			return existsSync(snapshotPath);
+		});
 
-	if (files.length === 0) {
+	if (folders.length === 0) {
 		return [];
 	}
 
-	// Parse all snapshots and build adjacency map: prevId -> [{path, timestamp, id}]
-	const snapshotMap = new Map<string, Array<{ path: string; timestamp: number; id: string }>>();
-	const snapshotsById = new Map<string, { path: string; prevId: string }>();
+	// Parse all snapshots and build adjacency map: prevId -> [{tag, timestamp, id}]
+	const snapshotMap = new Map<string, Array<{ tag: string; timestamp: number; id: string }>>();
+	const snapshotsById = new Map<string, { tag: string; prevId: string }>();
 
-	for (const file of files) {
+	for (const folder of folders) {
+		const snapshotPath = join(migrationsFolder, folder, 'snapshot.json');
 		try {
-			const content = JSON.parse(readFileSync(file).toString());
+			const content = JSON.parse(readFileSync(snapshotPath).toString());
 			const id = content.id;
 			const prevId = content.prevId || '';
-			const timestamp = getTimestamp(file);
+			const timestamp = getTimestamp(folder);
 
-			snapshotsById.set(id, { path: file, prevId });
+			snapshotsById.set(id, { tag: folder, prevId });
 
 			if (!snapshotMap.has(prevId)) {
 				snapshotMap.set(prevId, []);
 			}
-			snapshotMap.get(prevId)!.push({ path: file, timestamp, id });
+			snapshotMap.get(prevId)!.push({ tag: folder, timestamp, id });
 		} catch (e) {
-			console.error(`Error parsing snapshot ${file}:`, e);
+			console.error(`Error parsing snapshot ${snapshotPath}:`, e);
 		}
 	}
 
@@ -124,7 +129,7 @@ export const buildSnapshotChain = (metaFolder: string): string[] => {
 	}
 
 	// Build chain by traversing from root
-	const orderedSnapshots: string[] = [];
+	const orderedTags: string[] = [];
 
 	const traverse = (currentId: string) => {
 		const children = snapshotMap.get(currentId) || [];
@@ -133,7 +138,7 @@ export const buildSnapshotChain = (metaFolder: string): string[] => {
 		children.sort((a, b) => a.timestamp - b.timestamp);
 
 		for (const child of children) {
-			orderedSnapshots.push(child.path);
+			orderedTags.push(child.tag);
 			traverse(child.id);
 		}
 	};
@@ -141,11 +146,11 @@ export const buildSnapshotChain = (metaFolder: string): string[] => {
 	// Start traversal from each root (sorted by timestamp)
 	roots.sort((a, b) => a.timestamp - b.timestamp);
 	for (const root of roots) {
-		orderedSnapshots.push(root.path);
+		orderedTags.push(root.tag);
 		traverse(root.id);
 	}
 
-	return orderedSnapshots;
+	return orderedTags;
 };
 
 // export const preparePushFolder = (dialect: Dialect) => {
@@ -162,15 +167,13 @@ export const buildSnapshotChain = (metaFolder: string): string[] => {
 // };
 
 export const prepareOutFolder = (out: string, dialect: Dialect) => {
-	const meta = join(out, 'meta');
-
-	if (!existsSync(join(out, 'meta'))) {
-		mkdirSync(meta, { recursive: true });
+	if (!existsSync(out)) {
+		mkdirSync(out, { recursive: true });
 	}
 
-	const snapshots = buildSnapshotChain(meta);
+	const migrationTags = buildSnapshotChain(out);
 
-	return { meta, snapshots };
+	return { migrationTags };
 };
 
 const validatorForDialect = (dialect: Dialect) => {
@@ -190,23 +193,24 @@ const validatorForDialect = (dialect: Dialect) => {
 	}
 };
 
-export const validateWithReport = (snapshots: string[], dialect: Dialect) => {
+export const validateWithReport = (migrationTags: string[], migrationsFolder: string, dialect: Dialect) => {
 	// ✅ check if drizzle-kit can handle snapshot version
 	// ✅ check if snapshot is of the last version
 	// ✅ check if id of the snapshot is valid
 	// ✅ collect {} of prev id -> snapshotName[], if there's more than one - tell about collision
 	const { validator, version } = validatorForDialect(dialect);
 
-	const result = snapshots.reduce(
-		(accum, it) => {
-			const raw = JSON.parse(readFileSync(`./${it}`).toString());
+	const result = migrationTags.reduce(
+		(accum, tag) => {
+			const snapshotPath = join(migrationsFolder, tag, 'snapshot.json');
+			const raw = JSON.parse(readFileSync(snapshotPath).toString());
 
-			accum.rawMap[it] = raw;
+			accum.rawMap[tag] = raw;
 
 			if (raw['version'] && Number(raw['version']) > version) {
 				console.log(
 					info(
-						`${it} snapshot is of unsupported version, please update drizzle-kit`,
+						`${tag}/snapshot.json is of unsupported version, please update wizzle`,
 					),
 				);
 				process.exit(0);
@@ -214,22 +218,22 @@ export const validateWithReport = (snapshots: string[], dialect: Dialect) => {
 
 			const result = validator.safeParse(raw);
 			if (!result.success) {
-				accum.malformed.push(it);
+				accum.malformed.push(tag);
 				return accum;
 			}
 
 			const snapshot = result.data;
 			if (snapshot.version !== String(version)) {
-				accum.nonLatest.push(it);
+				accum.nonLatest.push(tag);
 				return accum;
 			}
 
 			// only if latest version here
 			const idEntry = accum.idsMap[snapshot['prevId']] ?? {
-				parent: it,
+				parent: tag,
 				snapshots: [],
 			};
-			idEntry.snapshots.push(it);
+			idEntry.snapshots.push(tag);
 			accum.idsMap[snapshot['prevId']] = idEntry;
 
 			return accum;
@@ -255,8 +259,8 @@ export const prepareMigrationFolder = (
 	outFolder: string = 'drizzle',
 	dialect: Dialect,
 ) => {
-	const { snapshots } = prepareOutFolder(outFolder, dialect);
-	const report = validateWithReport(snapshots, dialect);
+	const { migrationTags } = prepareOutFolder(outFolder, dialect);
+	const report = validateWithReport(migrationTags, outFolder, dialect);
 	if (report.nonLatest.length > 0) {
 		console.log(
 			report.nonLatest
@@ -272,7 +276,7 @@ export const prepareMigrationFolder = (
 	if (report.malformed.length) {
 		const message = report.malformed
 			.map((it) => {
-				return `${it} data is malformed`;
+				return `${it}/snapshot.json data is malformed`;
 			})
 			.join('\n');
 		console.log(message);
@@ -303,7 +307,7 @@ export const prepareMigrationFolder = (
 		process.exit(0);
 	}
 
-	return { snapshots };
+	return { migrationTags };
 };
 
 export const prepareMigrationMeta = (

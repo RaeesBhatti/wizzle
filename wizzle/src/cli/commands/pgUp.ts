@@ -15,8 +15,8 @@ import {
 import { prepareOutFolder, validateWithReport } from '../../utils';
 
 export const upPgHandler = (out: string) => {
-	const { snapshots } = prepareOutFolder(out, 'postgresql');
-	const report = validateWithReport(snapshots, 'postgresql');
+	const { migrationTags } = prepareOutFolder(out, 'postgresql');
+	const report = validateWithReport(migrationTags, out, 'postgresql');
 
 	report.nonLatest
 		.map((it) => ({

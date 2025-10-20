@@ -83,10 +83,29 @@ npm run generate
 
 Wizzle provides runtime migrators that work with snapshot chains instead of journal files. This makes wizzle fully independent from drizzle-orm's migration system.
 
+### Migration Structure
+
+Wizzle uses a folder-based migration structure where each migration is self-contained:
+
+```
+migrations/
+├── 1700000000000_initial_setup/
+│   ├── up.sql
+│   └── snapshot.json
+└── 1700000001000_add_users/
+    ├── up.sql
+    └── snapshot.json
+```
+
+Each migration folder contains:
+- `up.sql` - The SQL statements to apply
+- `snapshot.json` - Complete schema snapshot with metadata and `prevId` chain reference
+
 ### How it works
 
 Unlike drizzle-orm's runtime migrator which relies on `_journal.json`, wizzle's runtime migrator:
-- Uses snapshot chains to determine migration order by following `prevId` references
+- Uses snapshot chains to determine migration order by following `prevId` references in each snapshot
+- Each migration is self-contained in its own folder
 - Reads migration metadata directly from snapshot files
 - Provides detailed logging for each migration being applied
 - Maintains the same external API as drizzle-orm for easy migration
@@ -252,4 +271,10 @@ import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { migrate } from 'wizzle/migrator/node-postgres';
 ```
 
-The API remains identical - only the import path changes. Wizzle will use your existing migration files but read them via snapshot chains instead of the journal file.
+The API remains identical - only the import path changes.
+
+**Note on Migration Structure:** Wizzle uses a different folder structure than drizzle-kit:
+- **drizzle-kit:** Flat structure with `meta/` folder containing snapshots
+- **wizzle:** Folder per migration containing `up.sql` and `snapshot.json`
+
+If migrating from drizzle-kit, you'll need to manually restructure your migrations to the new folder-based format.

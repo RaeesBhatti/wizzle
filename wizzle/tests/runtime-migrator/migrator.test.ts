@@ -62,12 +62,12 @@ describe('readMigrationFiles', () => {
 		expect(migrations[1].sql[0]).toContain('ALTER TABLE `users` ADD `created_at`');
 	});
 
-	test('throws error when meta folder does not exist', () => {
+	test('throws error when migrations folder does not exist', () => {
 		expect(() => {
 			readMigrationFiles({
 				migrationsFolder: 'tests/runtime-migrator/fixtures/nonexistent',
 			});
-		}).toThrow("Can't find meta folder");
+		}).toThrow("Can't find migrations folder");
 	});
 
 	test('returns empty array when no snapshots exist', () => {

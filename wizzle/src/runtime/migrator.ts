@@ -34,42 +34,43 @@ export interface DrizzleInternal {
 }
 
 export function readMigrationFiles(config: MigrationConfig): MigrationMeta[] {
-	const migrationFolderTo = config.migrationsFolder;
-	const metaFolder = path.join(migrationFolderTo, 'meta');
+	const migrationsFolder = config.migrationsFolder;
 
-	// Check if meta folder exists
-	if (!fs.existsSync(metaFolder)) {
-		throw new Error(`Can't find meta folder at ${metaFolder}`);
+	// Check if migrations folder exists
+	if (!fs.existsSync(migrationsFolder)) {
+		throw new Error(`Can't find migrations folder at ${migrationsFolder}`);
 	}
 
-	// Use snapshot chain instead of journal
-	const orderedSnapshots = buildSnapshotChain(metaFolder);
+	// Use snapshot chain to get ordered migration tags
+	const orderedTags = buildSnapshotChain(migrationsFolder);
 
-	if (orderedSnapshots.length === 0) {
+	if (orderedTags.length === 0) {
 		// No migrations to apply
 		return [];
 	}
 
 	const migrationQueries: MigrationMeta[] = [];
 
-	for (const snapshotPath of orderedSnapshots) {
-		// Extract tag from snapshot filename (e.g., "1234567890_add_users_table_snapshot.json" -> "1234567890_add_users_table")
-		const filename = path.basename(snapshotPath, '.json');
-		const tag = filename.replace('_snapshot', '');
-
+	for (const tag of orderedTags) {
 		// Extract timestamp from tag (first part before underscore)
 		const timestampMatch = tag.match(/^(\d+)_/);
 		if (!timestampMatch) {
 			throw new Error(
-				`Invalid snapshot filename format: ${filename}. Expected format: <timestamp>_<name>_snapshot.json`,
+				`Invalid migration folder name: ${tag}. Expected format: <timestamp>_<name>`,
 			);
 		}
 		const timestamp = parseInt(timestampMatch[1]);
 
 		// Read SQL file
-		const sqlPath = path.join(migrationFolderTo, `${tag}.sql`);
+		const sqlPath = path.join(migrationsFolder, tag, 'up.sql');
 		if (!fs.existsSync(sqlPath)) {
 			throw new Error(`SQL file not found: ${sqlPath}`);
+		}
+
+		// Read snapshot file
+		const snapshotPath = path.join(migrationsFolder, tag, 'snapshot.json');
+		if (!fs.existsSync(snapshotPath)) {
+			throw new Error(`Snapshot file not found: ${snapshotPath}`);
 		}
 
 		try {
@@ -91,7 +92,7 @@ export function readMigrationFiles(config: MigrationConfig): MigrationMeta[] {
 				hash: crypto.createHash('sha256').update(query).digest('hex'),
 			});
 		} catch (error) {
-			throw new Error(`Failed to read migration file ${sqlPath}: ${error}`);
+			throw new Error(`Failed to read migration ${tag}: ${error}`);
 		}
 	}
 

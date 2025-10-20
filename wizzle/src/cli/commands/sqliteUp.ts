@@ -5,8 +5,8 @@ import { SQLiteSchema, sqliteSchemaV5 } from 'src/serializer/sqliteSchema';
 import { prepareOutFolder, validateWithReport } from 'src/utils';
 
 export const upSqliteHandler = (out: string) => {
-	const { snapshots } = prepareOutFolder(out, 'sqlite');
-	const report = validateWithReport(snapshots, 'sqlite');
+	const { migrationTags } = prepareOutFolder(out, 'sqlite');
+	const report = validateWithReport(migrationTags, out, 'sqlite');
 
 	report.nonLatest
 		.map((it) => ({
