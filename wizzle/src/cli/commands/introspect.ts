@@ -144,6 +144,7 @@ export const introspectPostgres = async (
 			outFolder: out,
 			breakpoints,
 			type: 'introspect',
+			casing,
 		});
 	} else {
 		render(
@@ -379,6 +380,7 @@ export const introspectMysql = async (
 			outFolder: out,
 			breakpoints,
 			type: 'introspect',
+			casing,
 		});
 	} else {
 		render(
@@ -485,6 +487,7 @@ export const introspectSingleStore = async (
 			outFolder: out,
 			breakpoints,
 			type: 'introspect',
+			casing,
 		});
 	} else {
 		render(
@@ -584,6 +587,7 @@ export const introspectSqlite = async (
 			outFolder: out,
 			breakpoints,
 			type: 'introspect',
+			casing,
 		});
 	} else {
 		render(
@@ -694,6 +698,7 @@ export const introspectLibSQL = async (
 			outFolder: out,
 			breakpoints,
 			type: 'introspect',
+			casing,
 		});
 	} else {
 		render(

@@ -2,6 +2,8 @@ import chalk from 'chalk';
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { buildSnapshotChain } from '../../utils';
+import { generateSchemaFromSnapshot } from '../../utils/schemaGenerator';
+import { Casing } from '../validations/common';
 
 export type Journal = {
 	version: string;
@@ -18,6 +20,7 @@ export type Journal = {
 export type MigrateOptions = {
 	out: string;
 	dryRun?: boolean;
+	casing?: Casing;
 };
 
 type ValidationResult = {
@@ -135,7 +138,7 @@ export function detectHybridStructure(folder: string): boolean {
  * @param options - Migration options
  */
 export async function migrateFromJournal(options: MigrateOptions): Promise<void> {
-	const { out, dryRun = false } = options;
+	const { out, dryRun = false, casing = 'camel' } = options;
 
 	console.log(chalk.bold('\nMigrating from journal-based to folder-based structure...\n'));
 
@@ -213,6 +216,11 @@ export async function migrateFromJournal(options: MigrateOptions): Promise<void>
 				join(newFolderPath, 'up.sql'),
 				sqlContent,
 			);
+
+			// Generate and write schema.ts from snapshot
+			const snapshot = JSON.parse(snapshotContent);
+			const { combined } = generateSchemaFromSnapshot(snapshot, casing);
+			writeFileSync(join(newFolderPath, 'schema.ts'), combined);
 
 			console.log(chalk.green(`✓ Migrated: ${tag} → ${newFolderName}/`));
 		}

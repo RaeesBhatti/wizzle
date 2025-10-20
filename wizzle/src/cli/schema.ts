@@ -658,11 +658,14 @@ export const migrateFromJournalCommand = command({
 		dryRun: boolean()
 			.desc('Show what would be migrated without making changes')
 			.default(false),
+		casing: string('introspect-casing').enum('camel', 'preserve').default('camel')
+			.desc('Casing for generated schema files'),
 	},
 	handler: async (opts) => {
 		await migrateFromJournal({
 			out: opts.out,
 			dryRun: opts.dryRun,
+			casing: opts.casing as 'camel' | 'preserve',
 		});
 	},
 });

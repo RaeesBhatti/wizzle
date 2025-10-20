@@ -303,7 +303,7 @@ export const columnsResolver = async (
 export const prepareAndMigratePg = async (config: GenerateConfig) => {
 	const outFolder = config.out;
 	const schemaPath = config.schema;
-	const casing = config.casing;
+	const casingType = config.casing;
 
 	try {
 		assertV1OutFolder(outFolder);
@@ -316,11 +316,14 @@ export const prepareAndMigratePg = async (config: GenerateConfig) => {
 		const { prev, cur, custom } = await preparePgMigrationSnapshot(
 			migrationTags,
 			schemaPath,
-			casing,
+			casingType,
 		);
 
 		const validatedPrev = pgSchema.parse(prev);
 		const validatedCur = pgSchema.parse(cur);
+
+		// Convert CasingType to Casing for schema generation
+		const casing: Casing = casingType === 'snake_case' ? 'preserve' : 'camel';
 
 		if (config.custom) {
 			writeResult({
@@ -526,7 +529,7 @@ export const prepareMySQLPush = async (
 export const prepareAndMigrateMysql = async (config: GenerateConfig) => {
 	const outFolder = config.out;
 	const schemaPath = config.schema;
-	const casing = config.casing;
+	const casingType = config.casing;
 
 	try {
 		// TODO: remove
@@ -536,11 +539,14 @@ export const prepareAndMigrateMysql = async (config: GenerateConfig) => {
 		const { prev, cur, custom } = await prepareMySqlMigrationSnapshot(
 			migrationTags,
 			schemaPath,
-			casing,
+			casingType,
 		);
 
 		const validatedPrev = mysqlSchema.parse(prev);
 		const validatedCur = mysqlSchema.parse(cur);
+
+		// Convert CasingType to Casing for schema generation
+		const casing: Casing = casingType === 'snake_case' ? 'preserve' : 'camel';
 
 		if (config.custom) {
 			writeResult({
@@ -674,7 +680,7 @@ export const prepareSingleStorePush = async (
 export const prepareAndMigrateSingleStore = async (config: GenerateConfig) => {
 	const outFolder = config.out;
 	const schemaPath = config.schema;
-	const casing = config.casing;
+	const casingType = config.casing;
 
 	try {
 		// TODO: remove
@@ -684,11 +690,14 @@ export const prepareAndMigrateSingleStore = async (config: GenerateConfig) => {
 		const { prev, cur, custom } = await prepareSingleStoreMigrationSnapshot(
 			migrationTags,
 			schemaPath,
-			casing,
+			casingType,
 		);
 
 		const validatedPrev = singlestoreSchema.parse(prev);
 		const validatedCur = singlestoreSchema.parse(cur);
+
+		// Convert CasingType to Casing for schema generation
+		const casing: Casing = casingType === 'snake_case' ? 'preserve' : 'camel';
 
 		if (config.custom) {
 			writeResult({
@@ -797,7 +806,7 @@ export const prepareAndExportMysql = async (config: ExportConfig) => {
 export const prepareAndMigrateSqlite = async (config: GenerateConfig) => {
 	const outFolder = config.out;
 	const schemaPath = config.schema;
-	const casing = config.casing;
+	const casingType = config.casing;
 
 	try {
 		assertV1OutFolder(outFolder);
@@ -806,11 +815,14 @@ export const prepareAndMigrateSqlite = async (config: GenerateConfig) => {
 		const { prev, cur, custom } = await prepareSqliteMigrationSnapshot(
 			migrationTags,
 			schemaPath,
-			casing,
+			casingType,
 		);
 
 		const validatedPrev = sqliteSchema.parse(prev);
 		const validatedCur = sqliteSchema.parse(cur);
+
+		// Convert CasingType to Casing for schema generation
+		const casing: Casing = casingType === 'snake_case' ? 'preserve' : 'camel';
 
 		if (config.custom) {
 			writeResult({
@@ -890,7 +902,7 @@ export const prepareAndExportSqlite = async (config: ExportConfig) => {
 export const prepareAndMigrateLibSQL = async (config: GenerateConfig) => {
 	const outFolder = config.out;
 	const schemaPath = config.schema;
-	const casing = config.casing;
+	const casingType = config.casing;
 
 	try {
 		assertV1OutFolder(outFolder);
@@ -899,11 +911,14 @@ export const prepareAndMigrateLibSQL = async (config: GenerateConfig) => {
 		const { prev, cur, custom } = await prepareSqliteMigrationSnapshot(
 			migrationTags,
 			schemaPath,
-			casing,
+			casingType,
 		);
 
 		const validatedPrev = sqliteSchema.parse(prev);
 		const validatedCur = sqliteSchema.parse(cur);
+
+		// Convert CasingType to Casing for schema generation
+		const casing: Casing = casingType === 'snake_case' ? 'preserve' : 'camel';
 
 		if (config.custom) {
 			writeResult({
@@ -1358,7 +1373,7 @@ export const writeResult = ({
 	bundle = false,
 	type = 'none',
 	driver,
-	casing = 'camelCase',
+	casing = 'camel',
 }: {
 	cur: CommonSchema;
 	sqlStatements: string[];
@@ -1369,7 +1384,7 @@ export const writeResult = ({
 	bundle?: boolean;
 	type?: 'introspect' | 'custom' | 'none';
 	driver?: Driver;
-	casing?: CasingType;
+	casing?: Casing;
 }) => {
 	if (type === 'none') {
 		console.log(schema(cur));
@@ -1413,9 +1428,7 @@ export const writeResult = ({
 	fs.writeFileSync(join(migrationFolderPath, 'up.sql'), sql);
 
 	// Generate and write schema.ts from snapshot
-	// Convert CasingType to Casing for introspection
-	const introspectCasing: Casing = casing === 'snake_case' ? 'preserve' : 'camel';
-	const { combined } = generateSchemaFromSnapshot(toSave, introspectCasing);
+	const { combined } = generateSchemaFromSnapshot(toSave, casing);
 	fs.writeFileSync(join(migrationFolderPath, 'schema.ts'), combined);
 
 	// js file with .sql imports for React Native / Expo and Durable Sqlite Objects
