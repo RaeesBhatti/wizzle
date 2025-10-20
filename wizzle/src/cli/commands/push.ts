@@ -24,6 +24,51 @@ import {
 } from './singlestorePushUtils';
 import { logSuggestionsAndReturn as sqliteSuggestions } from './sqlitePushUtils';
 
+export const confirmPushOperation = async (force: boolean): Promise<void> => {
+	if (force) {
+		console.log();
+		console.log(
+			chalk.red.bold('⚠ WARNING: --force flag is enabled\n'),
+		);
+		console.log(
+			chalk.yellow(
+				"You are bypassing safety confirmations and pushing directly to the database.\n"
+					+ "The 'migrate' command is recommended for production environments.\n",
+			),
+		);
+		console.log(chalk.gray('Proceeding with push...\n'));
+		return;
+	}
+
+	console.log();
+	console.log(
+		withStyle.warning(
+			"⚠ Warning: 'push' directly modifies your database schema without creating migration files.\n",
+		),
+	);
+	console.log(
+		chalk.yellow(
+			"For production environments, use 'migrate' command instead:\n"
+				+ '  - Creates versioned migration files\n'
+				+ '  - Enables rollback capabilities\n'
+				+ '  - Provides migration history\n'
+				+ '  - Safer for team collaboration\n',
+		),
+	);
+	console.log(chalk.white('Are you sure you want to push directly to the database?'));
+	console.log();
+
+	const { data } = await render(
+		new Select(['No, abort', 'Yes, proceed with push']),
+	);
+
+	if (data?.index === 0) {
+		render(`[${chalk.red('x')}] Push aborted`);
+		process.exit(0);
+	}
+	console.log();
+};
+
 export const mysqlPush = async (
 	schemaPath: string | string[],
 	credentials: MysqlCredentials,
@@ -53,6 +98,9 @@ export const mysqlPush = async (
 		if (filteredStatements.length === 0) {
 			render(`[${chalk.blue('i')}] No changes detected`);
 		} else {
+			// Confirm push operation
+			await confirmPushOperation(force);
+
 			const {
 				shouldAskForApprove,
 				statementsToExecute,
@@ -196,6 +244,9 @@ export const singlestorePush = async (
 		if (filteredStatements.length === 0) {
 			render(`[${chalk.blue('i')}] No changes detected`);
 		} else {
+			// Confirm push operation
+			await confirmPushOperation(force);
+
 			const {
 				shouldAskForApprove,
 				statementsToExecute,
@@ -316,6 +367,9 @@ export const pgPush = async (
 		if (statements.sqlStatements.length === 0) {
 			render(`[${chalk.blue('i')}] No changes detected`);
 		} else {
+			// Confirm push operation
+			await confirmPushOperation(force);
+
 			// const filteredStatements = filterStatements(statements.statements);
 			const {
 				shouldAskForApprove,
@@ -431,6 +485,9 @@ export const sqlitePush = async (
 	if (statements.sqlStatements.length === 0) {
 		render(`\n[${chalk.blue('i')}] No changes detected`);
 	} else {
+		// Confirm push operation
+		await confirmPushOperation(force);
+
 		const {
 			shouldAskForApprove,
 			statementsToExecute,
@@ -553,6 +610,9 @@ export const libSQLPush = async (
 	if (statements.sqlStatements.length === 0) {
 		render(`\n[${chalk.blue('i')}] No changes detected`);
 	} else {
+		// Confirm push operation
+		await confirmPushOperation(force);
+
 		const {
 			shouldAskForApprove,
 			statementsToExecute,
