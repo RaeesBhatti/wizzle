@@ -1,6 +1,6 @@
-import type { MigrationConfig } from '../migrator';
+import type { DrizzleInternal, MigrationConfig } from '../migrator';
 import { readMigrationFiles } from '../migrator';
-import { sql } from '~/sql/sql.ts';
+import { sql } from 'drizzle-orm';
 import type { DrizzleD1Database } from 'drizzle-orm/d1';
 
 export async function migrate<TSchema extends Record<string, unknown>>(
@@ -8,6 +8,7 @@ export async function migrate<TSchema extends Record<string, unknown>>(
 	config: MigrationConfig,
 ) {
 	const migrations = readMigrationFiles(config);
+	const internal = db as unknown as DrizzleInternal;
 	const migrationsTable = config.migrationsTable ?? '__drizzle_migrations';
 
 	const migrationTableCreate = sql`
@@ -17,7 +18,7 @@ export async function migrate<TSchema extends Record<string, unknown>>(
 			created_at numeric
 		)
 	`;
-	await db.session.run(migrationTableCreate);
+	await internal.session.run(migrationTableCreate);
 
 	const dbMigrations = await db.values<[number, string, string]>(
 		sql`SELECT id, hash, created_at FROM ${sql.identifier(migrationsTable)} ORDER BY created_at DESC LIMIT 1`,
@@ -44,6 +45,6 @@ export async function migrate<TSchema extends Record<string, unknown>>(
 	}
 
 	if (statementToBatch.length > 0) {
-		await db.session.batch(statementToBatch);
+		await internal.session.batch(statementToBatch);
 	}
 }

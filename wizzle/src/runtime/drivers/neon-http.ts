@@ -1,6 +1,6 @@
-import type { MigrationConfig } from '../migrator';
+import type { DrizzleInternal, MigrationConfig } from '../migrator';
 import { readMigrationFiles } from '../migrator';
-import { type SQL, sql } from '~/sql/sql.ts';
+import { type SQL, sql } from 'drizzle-orm';
 import type { NeonHttpDatabase } from 'drizzle-orm/neon-http';
 
 /**
@@ -16,6 +16,7 @@ export async function migrate<TSchema extends Record<string, unknown>>(
 	config: MigrationConfig,
 ) {
 	const migrations = readMigrationFiles(config);
+	const internal = db as unknown as DrizzleInternal;
 	const migrationsTable = config.migrationsTable ?? '__drizzle_migrations';
 	const migrationsSchema = config.migrationsSchema ?? 'drizzle';
 	const migrationTableCreate = sql`
@@ -25,14 +26,14 @@ export async function migrate<TSchema extends Record<string, unknown>>(
 			created_at bigint
 		)
 	`;
-	await db.session.execute(sql`CREATE SCHEMA IF NOT EXISTS ${sql.identifier(migrationsSchema)}`);
-	await db.session.execute(migrationTableCreate);
+	await internal.session.execute(sql`CREATE SCHEMA IF NOT EXISTS ${sql.identifier(migrationsSchema)}`);
+	await internal.session.execute(migrationTableCreate);
 
-	const dbMigrations = await db.session.all<{ id: number; hash: string; created_at: string }>(
+	const dbMigrations = (await internal.session.all(
 		sql`select id, hash, created_at from ${sql.identifier(migrationsSchema)}.${
 			sql.identifier(migrationsTable)
 		} order by created_at desc limit 1`,
-	);
+	)) as Array<{ id: number; hash: string; created_at: string }>;
 
 	const lastDbMigration = dbMigrations[0];
 	const rowsToInsert: SQL[] = [];
@@ -42,7 +43,7 @@ export async function migrate<TSchema extends Record<string, unknown>>(
 			|| Number(lastDbMigration.created_at) < migration.folderMillis
 		) {
 			for (const stmt of migration.sql) {
-				await db.session.execute(sql.raw(stmt));
+				await internal.session.execute(sql.raw(stmt));
 			}
 
 			rowsToInsert.push(
@@ -54,6 +55,6 @@ export async function migrate<TSchema extends Record<string, unknown>>(
 	}
 
 	for await (const rowToInsert of rowsToInsert) {
-		await db.session.execute(rowToInsert);
+		await internal.session.execute(rowToInsert);
 	}
 }

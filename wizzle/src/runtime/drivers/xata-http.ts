@@ -1,11 +1,7 @@
+import type { DrizzleInternal, MigrationConfig } from '../migrator';
 import { readMigrationFiles } from '../migrator';
-import { sql } from '~/sql/sql.ts';
+import { sql } from 'drizzle-orm';
 import type { XataHttpDatabase } from 'drizzle-orm/xata-http';
-
-export interface MigrationConfig {
-	migrationsFolder: string;
-	migrationsTable?: string;
-}
 
 /**
  * This function reads migrationFolder and execute each unapplied migration and mark it as executed in database
@@ -19,6 +15,7 @@ export interface MigrationConfig {
 	config: MigrationConfig,
 ) {
 	const migrations = readMigrationFiles(config);
+	const internal = db as unknown as DrizzleInternal;
 	const migrationsTable = config.migrationsTable ?? '__drizzle_migrations';
 	const migrationTableCreate = sql`
 		CREATE TABLE IF NOT EXISTS ${sql.identifier(migrationsTable)} (
@@ -27,25 +24,25 @@ export interface MigrationConfig {
 			created_at bigint
 		)
 	`;
-	await db.session.execute(migrationTableCreate);
+	await internal.session.execute(migrationTableCreate);
 
-	const dbMigrations = await db.session.all<{
+	const dbMigrations = (await internal.session.all(
+		sql`select id, hash, created_at from ${sql.identifier(migrationsTable)} order by created_at desc limit 1`,
+	)) as Array<{
 		id: number;
 		hash: string;
 		created_at: string;
-	}>(
-		sql`select id, hash, created_at from ${sql.identifier(migrationsTable)} order by created_at desc limit 1`,
-	);
+	}>;
 
 	const lastDbMigration = dbMigrations[0];
 
 	for await (const migration of migrations) {
 		if (!lastDbMigration || Number(lastDbMigration.created_at) < migration.folderMillis) {
 			for (const stmt of migration.sql) {
-				await db.session.execute(sql.raw(stmt));
+				await internal.session.execute(sql.raw(stmt));
 			}
 
-			await db.session.execute(
+			await internal.session.execute(
 				sql`insert into ${
 					sql.identifier(migrationsTable)
 				} ("hash", "created_at") values(${migration.hash}, ${migration.folderMillis})`,

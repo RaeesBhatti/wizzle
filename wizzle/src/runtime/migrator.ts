@@ -21,6 +21,18 @@ export interface MigrationMeta {
 	bps: boolean;
 }
 
+/**
+ * Internal database interface that exposes dialect and session properties.
+ * These properties exist at runtime but are marked as @internal in drizzle-orm,
+ * so they're not part of the public TypeScript API.
+ */
+export interface DrizzleInternal {
+	dialect: {
+		migrate(migrations: MigrationMeta[], session: any, config: MigrationConfig): Promise<void>;
+	};
+	session: any;
+}
+
 export function readMigrationFiles(config: MigrationConfig): MigrationMeta[] {
 	const migrationFolderTo = config.migrationsFolder;
 	const metaFolder = path.join(migrationFolderTo, 'meta');

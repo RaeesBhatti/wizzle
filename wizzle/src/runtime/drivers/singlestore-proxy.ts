@@ -1,6 +1,6 @@
 import type { MigrationConfig } from '../migrator';
 import { readMigrationFiles } from '../migrator';
-import { sql } from '~/sql/sql.ts';
+import { sql } from 'drizzle-orm';
 import type { SingleStoreRemoteDatabase } from 'drizzle-orm/singlestore-proxy';
 
 export type ProxyMigrator = (migrationQueries: string[]) => Promise<void>;
