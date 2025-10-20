@@ -127,8 +127,22 @@ function combineSchemaAndRelations(schema: string, relations: string): string {
 	const relationsImports = relationsLines.slice(0, relationsImportEnd);
 	const relationsCode = relationsLines.slice(relationsImportEnd);
 
+	// Filter out self-referencing imports from relations (e.g., import { users } from "./schema")
+	// These cause circular dependencies since we're combining into a single file
+	const filteredRelationsImports = relationsImports.filter((line) => {
+		const trimmed = line.trim();
+		// Keep non-import lines (comments, empty lines)
+		if (!trimmed.startsWith('import')) return true;
+		// Filter out imports from "./schema" or './schema'
+		if (trimmed.includes('from "./schema"') || trimmed.includes("from './schema'")) {
+			return false;
+		}
+		// Keep other imports (e.g., from "drizzle-orm/relations")
+		return true;
+	});
+
 	// Merge imports (deduplicate)
-	const allImports = new Set([...schemaImports, ...relationsImports]);
+	const allImports = new Set([...schemaImports, ...filteredRelationsImports]);
 	const mergedImports = Array.from(allImports).join('\n');
 
 	// Combine: imports + schema code + relations code
