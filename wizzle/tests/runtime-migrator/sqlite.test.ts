@@ -1,7 +1,7 @@
-import { drizzle } from 'drizzle-orm/better-sqlite3';
-import { migrate } from '../../src/runtime/drivers/better-sqlite3';
 import Database from 'better-sqlite3';
+import { drizzle } from 'drizzle-orm/better-sqlite3';
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
+import { migrate } from '../../src/runtime/drivers/better-sqlite3';
 
 describe('SQLite runtime migrator', () => {
 	let db: ReturnType<typeof drizzle>;

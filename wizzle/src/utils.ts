@@ -60,7 +60,6 @@ export const assertV1OutFolder = (out: string) => {
 	}
 };
 
-
 /**
  * Builds an ordered chain of migration snapshots by following prevId references.
  *
@@ -116,8 +115,8 @@ export const buildSnapshotChain = (metaFolder: string): string[] => {
 	}
 
 	// Find root(s) - snapshots with prevId === originUUID or ''
-	const roots = snapshotMap.get('00000000-0000-0000-0000-000000000000') ||
-	              snapshotMap.get('') || [];
+	const roots = snapshotMap.get('00000000-0000-0000-0000-000000000000')
+		|| snapshotMap.get('') || [];
 
 	if (roots.length === 0) {
 		console.warn('No root snapshot found (prevId should be originUUID)');

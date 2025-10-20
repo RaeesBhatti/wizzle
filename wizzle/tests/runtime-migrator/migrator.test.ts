@@ -67,7 +67,7 @@ describe('readMigrationFiles', () => {
 			readMigrationFiles({
 				migrationsFolder: 'tests/runtime-migrator/fixtures/nonexistent',
 			});
-		}).toThrow('Can\'t find meta folder');
+		}).toThrow("Can't find meta folder");
 	});
 
 	test('returns empty array when no snapshots exist', () => {

@@ -60,24 +60,43 @@ describe('All runtime migrator drivers', () => {
 	});
 
 	test('drivers are organized by database type', () => {
-		const pgDrivers = allDrivers.filter(d =>
-			['node-postgres', 'postgres-js', 'neon-serverless', 'neon-http', 'pglite', 'pg-proxy', 'vercel-postgres', 'xata-http', 'aws-data-api-pg'].includes(d)
+		const pgDrivers = allDrivers.filter((d) =>
+			[
+				'node-postgres',
+				'postgres-js',
+				'neon-serverless',
+				'neon-http',
+				'pglite',
+				'pg-proxy',
+				'vercel-postgres',
+				'xata-http',
+				'aws-data-api-pg',
+			].includes(d)
 		);
 		expect(pgDrivers).toHaveLength(9);
 
-		const mysqlDrivers = allDrivers.filter(d =>
+		const mysqlDrivers = allDrivers.filter((d) =>
 			['mysql2', 'mysql-proxy', 'planetscale-serverless', 'tidb-serverless'].includes(d)
 		);
 		expect(mysqlDrivers).toHaveLength(4);
 
-		const sqliteDrivers = allDrivers.filter(d =>
-			['better-sqlite3', 'libsql', 'bun-sqlite', 'bun-sql', 'sqlite-proxy', 'sql-js', 'd1', 'durable-sqlite', 'expo-sqlite', 'op-sqlite'].includes(d)
+		const sqliteDrivers = allDrivers.filter((d) =>
+			[
+				'better-sqlite3',
+				'libsql',
+				'bun-sqlite',
+				'bun-sql',
+				'sqlite-proxy',
+				'sql-js',
+				'd1',
+				'durable-sqlite',
+				'expo-sqlite',
+				'op-sqlite',
+			].includes(d)
 		);
 		expect(sqliteDrivers).toHaveLength(10);
 
-		const singlestoreDrivers = allDrivers.filter(d =>
-			['singlestore', 'singlestore-proxy'].includes(d)
-		);
+		const singlestoreDrivers = allDrivers.filter((d) => ['singlestore', 'singlestore-proxy'].includes(d));
 		expect(singlestoreDrivers).toHaveLength(2);
 	});
 });

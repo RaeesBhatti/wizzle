@@ -1,6 +1,6 @@
-import type { MigrationMeta } from '../migrator';
 import { sql } from 'drizzle-orm';
 import type { DrizzleSqliteDODatabase } from 'drizzle-orm/durable-sqlite';
+import type { MigrationMeta } from '../migrator';
 
 interface MigrationConfig {
 	journal: {

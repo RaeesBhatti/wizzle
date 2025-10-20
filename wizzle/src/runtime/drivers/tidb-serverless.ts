@@ -1,6 +1,6 @@
+import type { TiDBServerlessDatabase } from 'drizzle-orm/tidb-serverless';
 import type { DrizzleInternal, MigrationConfig } from '../migrator';
 import { readMigrationFiles } from '../migrator';
-import type { TiDBServerlessDatabase } from 'drizzle-orm/tidb-serverless';
 
 export async function migrate<TSchema extends Record<string, unknown>>(
 	db: TiDBServerlessDatabase<TSchema>,

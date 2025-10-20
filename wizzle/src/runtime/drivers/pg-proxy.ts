@@ -1,7 +1,7 @@
-import type { MigrationConfig } from '../migrator';
-import { readMigrationFiles } from '../migrator';
 import { sql } from 'drizzle-orm';
 import type { PgRemoteDatabase } from 'drizzle-orm/pg-proxy';
+import type { MigrationConfig } from '../migrator';
+import { readMigrationFiles } from '../migrator';
 
 export type ProxyMigrator = (migrationQueries: string[]) => Promise<void>;
 

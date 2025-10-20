@@ -60,7 +60,9 @@ export function readMigrationFiles(config: MigrationConfig): MigrationMeta[] {
 		// Extract timestamp from tag (first part before underscore)
 		const timestampMatch = tag.match(/^(\d+)_/);
 		if (!timestampMatch) {
-			throw new Error(`Invalid snapshot filename format: ${filename}. Expected format: <timestamp>_<name>_snapshot.json`);
+			throw new Error(
+				`Invalid snapshot filename format: ${filename}. Expected format: <timestamp>_<name>_snapshot.json`,
+			);
 		}
 		const timestamp = parseInt(timestampMatch[1]);
 

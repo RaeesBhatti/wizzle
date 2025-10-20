@@ -1,6 +1,6 @@
+import type { SQLJsDatabase } from 'drizzle-orm/sql-js';
 import type { DrizzleInternal, MigrationConfig } from '../migrator';
 import { readMigrationFiles } from '../migrator';
-import type { SQLJsDatabase } from 'drizzle-orm/sql-js';
 
 export function migrate<TSchema extends Record<string, unknown>>(
 	db: SQLJsDatabase<TSchema>,

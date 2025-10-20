@@ -1,6 +1,6 @@
+import type { MySql2Database } from 'drizzle-orm/mysql2';
 import type { DrizzleInternal, MigrationConfig } from '../migrator';
 import { readMigrationFiles } from '../migrator';
-import type { MySql2Database } from 'drizzle-orm/mysql2';
 
 export async function migrate<TSchema extends Record<string, unknown>>(
 	db: MySql2Database<TSchema>,

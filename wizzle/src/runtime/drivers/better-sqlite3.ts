@@ -1,6 +1,6 @@
+import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import type { DrizzleInternal, MigrationConfig } from '../migrator';
 import { readMigrationFiles } from '../migrator';
-import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 
 export function migrate<TSchema extends Record<string, unknown>>(
 	db: BetterSQLite3Database<TSchema>,

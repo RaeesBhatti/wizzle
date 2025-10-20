@@ -1,7 +1,7 @@
-import type { DrizzleInternal, MigrationConfig } from '../migrator';
-import { readMigrationFiles } from '../migrator';
 import { sql } from 'drizzle-orm';
 import type { XataHttpDatabase } from 'drizzle-orm/xata-http';
+import type { DrizzleInternal, MigrationConfig } from '../migrator';
+import { readMigrationFiles } from '../migrator';
 
 /**
  * This function reads migrationFolder and execute each unapplied migration and mark it as executed in database

@@ -1,6 +1,6 @@
+import type { AwsDataApiPgDatabase } from 'drizzle-orm/aws-data-api/pg';
 import type { DrizzleInternal, MigrationConfig } from '../migrator';
 import { readMigrationFiles } from '../migrator';
-import type { AwsDataApiPgDatabase } from 'drizzle-orm/aws-data-api/pg';
 
 export async function migrate<TSchema extends Record<string, unknown>>(
 	db: AwsDataApiPgDatabase<TSchema>,

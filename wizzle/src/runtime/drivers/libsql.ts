@@ -1,7 +1,7 @@
-import type { DrizzleInternal, MigrationConfig } from '../migrator';
-import { readMigrationFiles } from '../migrator';
 import { sql } from 'drizzle-orm';
 import type { LibSQLDatabase } from 'drizzle-orm/libsql';
+import type { DrizzleInternal, MigrationConfig } from '../migrator';
+import { readMigrationFiles } from '../migrator';
 
 export async function migrate<TSchema extends Record<string, unknown>>(
 	db: LibSQLDatabase<TSchema>,

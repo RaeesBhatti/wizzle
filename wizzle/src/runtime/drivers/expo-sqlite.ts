@@ -1,6 +1,6 @@
+import type { ExpoSQLiteDatabase } from 'drizzle-orm/expo-sqlite';
 import type { DrizzleInternal, MigrationConfig } from '../migrator';
 import { readMigrationFiles } from '../migrator';
-import type { ExpoSQLiteDatabase } from 'drizzle-orm/expo-sqlite';
 
 export async function migrate<TSchema extends Record<string, unknown>>(
 	db: ExpoSQLiteDatabase<TSchema>,

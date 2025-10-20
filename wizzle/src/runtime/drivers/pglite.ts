@@ -1,6 +1,6 @@
+import type { PgliteDatabase } from 'drizzle-orm/pglite';
 import type { DrizzleInternal, MigrationConfig } from '../migrator';
 import { readMigrationFiles } from '../migrator';
-import type { PgliteDatabase } from 'drizzle-orm/pglite';
 
 export async function migrate<TSchema extends Record<string, unknown>>(
 	db: PgliteDatabase<TSchema>,
