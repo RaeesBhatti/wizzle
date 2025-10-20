@@ -17,7 +17,7 @@ export type Journal = {
 	}[];
 };
 
-export type MigrateOptions = {
+export type GenerateOptions = {
 	out: string;
 	dryRun?: boolean;
 	casing?: Casing;
@@ -134,13 +134,13 @@ export function detectHybridStructure(folder: string): boolean {
 }
 
 /**
- * Migrate from journal-based structure to folder-based structure
- * @param options - Migration options
+ * Generate folder-based migrations from journal-based structure
+ * @param options - Generation options
  */
-export async function migrateFromJournal(options: MigrateOptions): Promise<void> {
+export async function generateFromJournal(options: GenerateOptions): Promise<void> {
 	const { out, dryRun = false, casing = 'camel' } = options;
 
-	console.log(chalk.bold('\nMigrating from journal-based to folder-based structure...\n'));
+	console.log(chalk.bold('\nGenerating folder-based migrations from journal...\n'));
 
 	// Validate journal structure
 	const validation = validateJournalStructure(out);
@@ -200,7 +200,7 @@ export async function migrateFromJournal(options: MigrateOptions): Promise<void>
 		const sqlContent = readFileSync(sqlPath, 'utf8');
 
 		if (dryRun) {
-			console.log(chalk.green(`✓ Would migrate: ${tag} → ${newFolderName}/`));
+			console.log(chalk.green(`✓ Would generate: ${tag} → ${newFolderName}/`));
 		} else {
 			// Create new folder
 			mkdirSync(newFolderPath, { recursive: true });
@@ -222,7 +222,7 @@ export async function migrateFromJournal(options: MigrateOptions): Promise<void>
 			const { combined } = generateSchemaFromSnapshot(snapshot, casing);
 			writeFileSync(join(newFolderPath, 'schema.ts'), combined);
 
-			console.log(chalk.green(`✓ Migrated: ${tag} → ${newFolderName}/`));
+			console.log(chalk.green(`✓ Generated: ${tag} → ${newFolderName}/`));
 		}
 
 		migratedCount++;
@@ -232,14 +232,14 @@ export async function migrateFromJournal(options: MigrateOptions): Promise<void>
 	console.log(chalk.bold('\n' + '─'.repeat(50)));
 	if (dryRun) {
 		console.log(chalk.cyan(`\n🔍 Dry run complete:`));
-		console.log(chalk.cyan(`   ${migratedCount} migrations would be created`));
+		console.log(chalk.cyan(`   ${migratedCount} migrations would be generated`));
 		if (skippedCount > 0) {
 			console.log(chalk.cyan(`   ${skippedCount} migrations already exist`));
 		}
-		console.log(chalk.cyan(`\nRun without --dry-run to perform the migration.`));
+		console.log(chalk.cyan(`\nRun without --dry-run to generate the migrations.`));
 	} else {
-		console.log(chalk.green(`\n✅ Migration complete:`));
-		console.log(chalk.green(`   ${migratedCount} migrations created`));
+		console.log(chalk.green(`\n✅ Generation complete:`));
+		console.log(chalk.green(`   ${migratedCount} migrations generated`));
 		if (skippedCount > 0) {
 			console.log(chalk.yellow(`   ${skippedCount} migrations skipped (already exist)`));
 		}

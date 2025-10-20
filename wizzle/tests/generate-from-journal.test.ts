@@ -3,10 +3,10 @@ import { join } from 'path';
 import { afterEach, describe, expect, test } from 'vitest';
 import {
 	detectHybridStructure,
-	migrateFromJournal,
+	generateFromJournal,
 	parseTagName,
 	validateJournalStructure,
-} from '../src/cli/commands/migrate-from-journal';
+} from '../src/cli/commands/generate-from-journal';
 import {
 	cleanupMigrationFolder,
 	countMigrationFolders,
@@ -152,7 +152,7 @@ describe('detectHybridStructure', () => {
 	});
 });
 
-describe('migrateFromJournal', () => {
+describe('generateFromJournal', () => {
 	let tempFolder: string;
 
 	afterEach(() => {
@@ -174,7 +174,7 @@ describe('migrateFromJournal', () => {
 		expect(countMigrationFolders(tempFolder)).toBe(0);
 
 		// Perform migration
-		await migrateFromJournal({
+		await generateFromJournal({
 			out: tempFolder,
 			dryRun: false,
 		});
@@ -210,7 +210,7 @@ describe('migrateFromJournal', () => {
 		fs.cpSync(sourceFolder, tempFolder, { recursive: true });
 
 		// Perform dry run
-		await migrateFromJournal({
+		await generateFromJournal({
 			out: tempFolder,
 			dryRun: true,
 		});
@@ -244,7 +244,7 @@ describe('migrateFromJournal', () => {
 		);
 
 		// Perform migration
-		await migrateFromJournal({
+		await generateFromJournal({
 			out: tempFolder,
 			dryRun: false,
 		});
@@ -261,7 +261,7 @@ describe('migrateFromJournal', () => {
 		const sourceFolder = 'tests/fixtures/journal-based';
 		fs.cpSync(sourceFolder, tempFolder, { recursive: true });
 
-		await migrateFromJournal({
+		await generateFromJournal({
 			out: tempFolder,
 			dryRun: false,
 		});
@@ -277,7 +277,7 @@ describe('migrateFromJournal', () => {
 
 		// Expect the migration to exit with error
 		await expect(
-			migrateFromJournal({
+			generateFromJournal({
 				out: tempFolder,
 				dryRun: false,
 			}),
@@ -292,7 +292,7 @@ describe('migrateFromJournal', () => {
 		const sourceFolder = 'tests/fixtures/journal-based';
 		fs.cpSync(sourceFolder, tempFolder, { recursive: true });
 
-		await migrateFromJournal({
+		await generateFromJournal({
 			out: tempFolder,
 			dryRun: false,
 		});
@@ -314,7 +314,7 @@ describe('migrateFromJournal', () => {
 		const sourceFolder = 'tests/fixtures/journal-based';
 		fs.cpSync(sourceFolder, tempFolder, { recursive: true });
 
-		await migrateFromJournal({
+		await generateFromJournal({
 			out: tempFolder,
 			dryRun: false,
 		});

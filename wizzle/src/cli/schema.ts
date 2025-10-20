@@ -11,7 +11,7 @@ import { assertV1OutFolder } from '../utils';
 import { certs } from '../utils/certs';
 import { checkHandler } from './commands/check';
 import { dropMigration } from './commands/drop';
-import { migrateFromJournal } from './commands/migrate-from-journal';
+import { generateFromJournal } from './commands/generate-from-journal';
 import { upMysqlHandler } from './commands/mysqlUp';
 import { upPgHandler } from './commands/pgUp';
 import { upSinglestoreHandler } from './commands/singlestoreUp';
@@ -650,19 +650,19 @@ export const drop = command({
 	},
 });
 
-export const migrateFromJournalCommand = command({
-	name: 'migrate-from-journal',
-	desc: 'Migrate from journal-based to folder-based migration structure',
+export const generateFromJournalCommand = command({
+	name: 'generate-from-journal',
+	desc: 'Generate folder-based migrations from journal-based structure',
 	options: {
 		out: optionOut.default('drizzle'),
 		dryRun: boolean()
-			.desc('Show what would be migrated without making changes')
+			.desc('Show what would be generated without making changes')
 			.default(false),
 		casing: string('introspect-casing').enum('camel', 'preserve').default('camel')
 			.desc('Casing for generated schema files'),
 	},
 	handler: async (opts) => {
-		await migrateFromJournal({
+		await generateFromJournal({
 			out: opts.out,
 			dryRun: opts.dryRun,
 			casing: opts.casing as 'camel' | 'preserve',
