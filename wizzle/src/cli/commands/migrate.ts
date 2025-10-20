@@ -42,8 +42,9 @@ import {
 	TablePolicyResolverOutput,
 } from '../../snapshotsDiffer';
 import { assertV1OutFolder, buildSnapshotChain, prepareMigrationFolder } from '../../utils';
+import { generateSchemaFromSnapshot } from '../../utils/schemaGenerator';
 import { prepareMigrationMetadata } from '../../utils/words';
-import { CasingType, Driver } from '../validations/common';
+import { Casing, CasingType, Driver } from '../validations/common';
 import { withStyle } from '../validations/outputs';
 import {
 	isRenamePromptItem,
@@ -329,6 +330,7 @@ export const prepareAndMigratePg = async (config: GenerateConfig) => {
 				name: config.name,
 				breakpoints: config.breakpoints,
 				type: 'custom',
+				casing,
 			});
 			return;
 		}
@@ -358,6 +360,7 @@ export const prepareAndMigratePg = async (config: GenerateConfig) => {
 			outFolder,
 			name: config.name,
 			breakpoints: config.breakpoints,
+			casing,
 		});
 	} catch (e) {
 		console.error(e);
@@ -547,6 +550,7 @@ export const prepareAndMigrateMysql = async (config: GenerateConfig) => {
 				name: config.name,
 				breakpoints: config.breakpoints,
 				type: 'custom',
+				casing,
 			});
 			return;
 		}
@@ -571,6 +575,7 @@ export const prepareAndMigrateMysql = async (config: GenerateConfig) => {
 			outFolder,
 			name: config.name,
 			breakpoints: config.breakpoints,
+			casing,
 		});
 	} catch (e) {
 		console.error(e);
@@ -693,6 +698,7 @@ export const prepareAndMigrateSingleStore = async (config: GenerateConfig) => {
 				name: config.name,
 				breakpoints: config.breakpoints,
 				type: 'custom',
+				casing,
 			});
 			return;
 		}
@@ -717,6 +723,7 @@ export const prepareAndMigrateSingleStore = async (config: GenerateConfig) => {
 			outFolder,
 			name: config.name,
 			breakpoints: config.breakpoints,
+			casing,
 		});
 	} catch (e) {
 		console.error(e);
@@ -814,6 +821,7 @@ export const prepareAndMigrateSqlite = async (config: GenerateConfig) => {
 				breakpoints: config.breakpoints,
 				bundle: config.bundle,
 				type: 'custom',
+				casing,
 			});
 			return;
 		}
@@ -840,6 +848,7 @@ export const prepareAndMigrateSqlite = async (config: GenerateConfig) => {
 			breakpoints: config.breakpoints,
 			bundle: config.bundle,
 			driver: config.driver,
+			casing,
 		});
 	} catch (e) {
 		console.error(e);
@@ -905,6 +914,7 @@ export const prepareAndMigrateLibSQL = async (config: GenerateConfig) => {
 				breakpoints: config.breakpoints,
 				bundle: config.bundle,
 				type: 'custom',
+				casing,
 			});
 			return;
 		}
@@ -930,6 +940,7 @@ export const prepareAndMigrateLibSQL = async (config: GenerateConfig) => {
 			name: config.name,
 			breakpoints: config.breakpoints,
 			bundle: config.bundle,
+			casing,
 		});
 	} catch (e) {
 		console.error(e);
@@ -1347,6 +1358,7 @@ export const writeResult = ({
 	bundle = false,
 	type = 'none',
 	driver,
+	casing = 'camelCase',
 }: {
 	cur: CommonSchema;
 	sqlStatements: string[];
@@ -1357,6 +1369,7 @@ export const writeResult = ({
 	bundle?: boolean;
 	type?: 'introspect' | 'custom' | 'none';
 	driver?: Driver;
+	casing?: CasingType;
 }) => {
 	if (type === 'none') {
 		console.log(schema(cur));
@@ -1398,6 +1411,12 @@ export const writeResult = ({
 
 	// Write SQL to: <outFolder>/<tag>/up.sql
 	fs.writeFileSync(join(migrationFolderPath, 'up.sql'), sql);
+
+	// Generate and write schema.ts from snapshot
+	// Convert CasingType to Casing for introspection
+	const introspectCasing: Casing = casing === 'snake_case' ? 'preserve' : 'camel';
+	const { combined } = generateSchemaFromSnapshot(toSave, introspectCasing);
+	fs.writeFileSync(join(migrationFolderPath, 'schema.ts'), combined);
 
 	// js file with .sql imports for React Native / Expo and Durable Sqlite Objects
 	if (bundle) {
