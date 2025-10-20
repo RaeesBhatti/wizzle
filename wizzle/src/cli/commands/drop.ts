@@ -1,9 +1,9 @@
 import chalk from 'chalk';
-import { readFileSync, rmSync, writeFileSync } from 'fs';
+import { rmSync } from 'fs';
 import fs from 'fs';
 import { render } from 'hanji';
-import { join } from 'path';
-import { Journal } from '../../utils';
+import { basename, join } from 'path';
+import { buildSnapshotChain } from '../../utils';
 import { DropMigrationView } from '../views';
 import { embeddedMigrations } from './migrate';
 
@@ -14,46 +14,48 @@ export const dropMigration = async ({
 	out: string;
 	bundle: boolean;
 }) => {
-	const metaFilePath = join(out, 'meta', '_journal.json');
-	const journal = JSON.parse(readFileSync(metaFilePath, 'utf-8')) as Journal;
+	const metaFolder = join(out, 'meta');
+	const orderedSnapshots = buildSnapshotChain(metaFolder);
 
-	if (journal.entries.length === 0) {
+	if (orderedSnapshots.length === 0) {
 		console.log(
-			`[${chalk.blue('i')}] no migration entries found in ${metaFilePath}`,
+			`[${chalk.blue('i')}] no migration snapshots found in ${metaFolder}`,
 		);
 		return;
 	}
 
-	const result = await render(new DropMigrationView(journal.entries));
+	// Convert snapshot paths to entries for the view
+	const entries = orderedSnapshots.map((snapshotPath, idx) => {
+		const filename = basename(snapshotPath, '.json');
+		const tag = filename.replace('_snapshot', '');
+		return {
+			idx,
+			tag,
+			when: 0, // Not used in drop view
+		};
+	});
+
+	const result = await render(new DropMigrationView(entries));
 	if (result.status === 'aborted') return;
 
-	delete journal.entries[journal.entries.indexOf(result.data!)];
+	const selectedTag = result.data.tag;
+	const snapshotFilePath = join(metaFolder, `${selectedTag}_snapshot.json`);
+	const sqlFilePath = join(out, `${selectedTag}.sql`);
 
-	const resultJournal: Journal = {
-		...journal,
-		entries: journal.entries.filter(Boolean),
-	};
-	const sqlFilePath = join(out, `${result.data.tag}.sql`);
-	const snapshotFilePath = join(
-		out,
-		'meta',
-		`${result.data.tag.split('_')[0]}_snapshot.json`,
-	);
-	rmSync(sqlFilePath);
 	rmSync(snapshotFilePath);
-	writeFileSync(metaFilePath, JSON.stringify(resultJournal, null, 2));
+	rmSync(sqlFilePath);
 
 	if (bundle) {
 		fs.writeFileSync(
 			join(out, `migrations.js`),
-			embeddedMigrations(resultJournal),
+			embeddedMigrations(out),
 		);
 	}
 
 	console.log(
 		`[${chalk.green('✓')}] ${
 			chalk.bold(
-				result.data.tag,
+				selectedTag,
 			)
 		} migration successfully dropped`,
 	);

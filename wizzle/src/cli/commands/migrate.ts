@@ -41,9 +41,9 @@ import {
 	TablePolicyResolverInput,
 	TablePolicyResolverOutput,
 } from '../../snapshotsDiffer';
-import { assertV1OutFolder, Journal, prepareMigrationFolder } from '../../utils';
+import { assertV1OutFolder, prepareMigrationFolder } from '../../utils';
 import { prepareMigrationMetadata } from '../../utils/words';
-import { CasingType, Driver, Prefix } from '../validations/common';
+import { CasingType, Driver } from '../validations/common';
 import { withStyle } from '../validations/outputs';
 import {
 	isRenamePromptItem,
@@ -307,7 +307,7 @@ export const prepareAndMigratePg = async (config: GenerateConfig) => {
 	try {
 		assertV1OutFolder(outFolder);
 
-		const { snapshots, journal } = prepareMigrationFolder(
+		const { snapshots } = prepareMigrationFolder(
 			outFolder,
 			'postgresql',
 		);
@@ -325,12 +325,10 @@ export const prepareAndMigratePg = async (config: GenerateConfig) => {
 			writeResult({
 				cur: custom,
 				sqlStatements: [],
-				journal,
 				outFolder,
 				name: config.name,
 				breakpoints: config.breakpoints,
 				type: 'custom',
-				prefixMode: config.prefix,
 			});
 			return;
 		}
@@ -357,11 +355,9 @@ export const prepareAndMigratePg = async (config: GenerateConfig) => {
 		writeResult({
 			cur,
 			sqlStatements,
-			journal,
 			outFolder,
 			name: config.name,
 			breakpoints: config.breakpoints,
-			prefixMode: config.prefix,
 		});
 	} catch (e) {
 		console.error(e);
@@ -533,7 +529,7 @@ export const prepareAndMigrateMysql = async (config: GenerateConfig) => {
 		// TODO: remove
 		assertV1OutFolder(outFolder);
 
-		const { snapshots, journal } = prepareMigrationFolder(outFolder, 'mysql');
+		const { snapshots } = prepareMigrationFolder(outFolder, 'mysql');
 		const { prev, cur, custom } = await prepareMySqlMigrationSnapshot(
 			snapshots,
 			schemaPath,
@@ -547,12 +543,10 @@ export const prepareAndMigrateMysql = async (config: GenerateConfig) => {
 			writeResult({
 				cur: custom,
 				sqlStatements: [],
-				journal,
 				outFolder,
 				name: config.name,
 				breakpoints: config.breakpoints,
 				type: 'custom',
-				prefixMode: config.prefix,
 			});
 			return;
 		}
@@ -573,12 +567,10 @@ export const prepareAndMigrateMysql = async (config: GenerateConfig) => {
 		writeResult({
 			cur,
 			sqlStatements,
-			journal,
 			_meta,
 			outFolder,
 			name: config.name,
 			breakpoints: config.breakpoints,
-			prefixMode: config.prefix,
 		});
 	} catch (e) {
 		console.error(e);
@@ -683,7 +675,7 @@ export const prepareAndMigrateSingleStore = async (config: GenerateConfig) => {
 		// TODO: remove
 		assertV1OutFolder(outFolder);
 
-		const { snapshots, journal } = prepareMigrationFolder(outFolder, 'singlestore');
+		const { snapshots } = prepareMigrationFolder(outFolder, 'singlestore');
 		const { prev, cur, custom } = await prepareSingleStoreMigrationSnapshot(
 			snapshots,
 			schemaPath,
@@ -697,12 +689,10 @@ export const prepareAndMigrateSingleStore = async (config: GenerateConfig) => {
 			writeResult({
 				cur: custom,
 				sqlStatements: [],
-				journal,
 				outFolder,
 				name: config.name,
 				breakpoints: config.breakpoints,
 				type: 'custom',
-				prefixMode: config.prefix,
 			});
 			return;
 		}
@@ -723,12 +713,10 @@ export const prepareAndMigrateSingleStore = async (config: GenerateConfig) => {
 		writeResult({
 			cur,
 			sqlStatements,
-			journal,
 			_meta,
 			outFolder,
 			name: config.name,
 			breakpoints: config.breakpoints,
-			prefixMode: config.prefix,
 		});
 	} catch (e) {
 		console.error(e);
@@ -807,7 +795,7 @@ export const prepareAndMigrateSqlite = async (config: GenerateConfig) => {
 	try {
 		assertV1OutFolder(outFolder);
 
-		const { snapshots, journal } = prepareMigrationFolder(outFolder, 'sqlite');
+		const { snapshots } = prepareMigrationFolder(outFolder, 'sqlite');
 		const { prev, cur, custom } = await prepareSqliteMigrationSnapshot(
 			snapshots,
 			schemaPath,
@@ -821,13 +809,11 @@ export const prepareAndMigrateSqlite = async (config: GenerateConfig) => {
 			writeResult({
 				cur: custom,
 				sqlStatements: [],
-				journal,
 				outFolder,
 				name: config.name,
 				breakpoints: config.breakpoints,
 				bundle: config.bundle,
 				type: 'custom',
-				prefixMode: config.prefix,
 			});
 			return;
 		}
@@ -848,13 +834,11 @@ export const prepareAndMigrateSqlite = async (config: GenerateConfig) => {
 		writeResult({
 			cur,
 			sqlStatements,
-			journal,
 			_meta,
 			outFolder,
 			name: config.name,
 			breakpoints: config.breakpoints,
 			bundle: config.bundle,
-			prefixMode: config.prefix,
 			driver: config.driver,
 		});
 	} catch (e) {
@@ -902,7 +886,7 @@ export const prepareAndMigrateLibSQL = async (config: GenerateConfig) => {
 	try {
 		assertV1OutFolder(outFolder);
 
-		const { snapshots, journal } = prepareMigrationFolder(outFolder, 'sqlite');
+		const { snapshots } = prepareMigrationFolder(outFolder, 'sqlite');
 		const { prev, cur, custom } = await prepareSqliteMigrationSnapshot(
 			snapshots,
 			schemaPath,
@@ -916,13 +900,11 @@ export const prepareAndMigrateLibSQL = async (config: GenerateConfig) => {
 			writeResult({
 				cur: custom,
 				sqlStatements: [],
-				journal,
 				outFolder,
 				name: config.name,
 				breakpoints: config.breakpoints,
 				bundle: config.bundle,
 				type: 'custom',
-				prefixMode: config.prefix,
 			});
 			return;
 		}
@@ -943,13 +925,11 @@ export const prepareAndMigrateLibSQL = async (config: GenerateConfig) => {
 		writeResult({
 			cur,
 			sqlStatements,
-			journal,
 			_meta,
 			outFolder,
 			name: config.name,
 			breakpoints: config.breakpoints,
 			bundle: config.bundle,
-			prefixMode: config.prefix,
 		});
 	} catch (e) {
 		console.error(e);
@@ -1356,7 +1336,6 @@ export const BREAKPOINT = '--> statement-breakpoint\n';
 export const writeResult = ({
 	cur,
 	sqlStatements,
-	journal,
 	_meta = {
 		columns: {},
 		schemas: {},
@@ -1367,16 +1346,13 @@ export const writeResult = ({
 	name,
 	bundle = false,
 	type = 'none',
-	prefixMode,
 	driver,
 }: {
 	cur: CommonSchema;
 	sqlStatements: string[];
-	journal: Journal;
 	_meta?: any;
 	outFolder: string;
 	breakpoints: boolean;
-	prefixMode: Prefix;
 	name?: string;
 	bundle?: boolean;
 	type?: 'introspect' | 'custom' | 'none';
@@ -1391,22 +1367,14 @@ export const writeResult = ({
 		}
 	}
 
-	// append entry to _migrations.json
-	// append entry to _journal.json->entries
-	// dialect in _journal.json
-	// append sql file to out folder
 	// append snapshot file to meta folder
-	const lastEntryInJournal = journal.entries[journal.entries.length - 1];
-	const idx = typeof lastEntryInJournal === 'undefined' ? 0 : lastEntryInJournal.idx + 1;
-
-	const { prefix, tag } = prepareMigrationMetadata(idx, prefixMode, name);
+	// append sql file to out folder
+	const { prefix, tag } = prepareMigrationMetadata(name);
 
 	const toSave = JSON.parse(JSON.stringify(cur));
 	toSave['_meta'] = _meta;
 
-	// todo: save results to a new migration folder
 	const metaFolderPath = join(outFolder, 'meta');
-	const metaJournal = join(metaFolderPath, '_journal.json');
 
 	fs.writeFileSync(
 		join(metaFolderPath, `${prefix}_snapshot.json`),
@@ -1426,21 +1394,11 @@ export const writeResult = ({
 		sql = '-- Custom SQL migration file, put your code below! --';
 	}
 
-	journal.entries.push({
-		idx,
-		version: cur.version,
-		when: +new Date(),
-		tag,
-		breakpoints: breakpoints,
-	});
-
-	fs.writeFileSync(metaJournal, JSON.stringify(journal, null, 2));
-
 	fs.writeFileSync(`${outFolder}/${tag}.sql`, sql);
 
 	// js file with .sql imports for React Native / Expo and Durable Sqlite Objects
 	if (bundle) {
-		const js = embeddedMigrations(journal, driver);
+		const js = embeddedMigrations(outFolder, driver);
 		fs.writeFileSync(`${outFolder}/migrations.js`, js);
 	}
 
@@ -1457,28 +1415,27 @@ export const writeResult = ({
 	);
 };
 
-export const embeddedMigrations = (journal: Journal, driver?: Driver) => {
+export const embeddedMigrations = (outFolder: string, driver?: Driver) => {
+	const metaFolder = join(outFolder, 'meta');
+	const { buildSnapshotChain } = require('../../utils');
+	const orderedSnapshots: string[] = buildSnapshotChain(metaFolder);
+
 	let content = driver === 'expo'
 		? '// This file is required for Expo/React Native SQLite migrations - https://orm.drizzle.team/quick-sqlite/expo\n\n'
 		: '';
 
-	content += "import journal from './meta/_journal.json';\n";
-	journal.entries.forEach((entry) => {
-		content += `import m${entry.idx.toString().padStart(4, '0')} from './${entry.tag}.sql';\n`;
+	orderedSnapshots.forEach((snapshotPath, idx) => {
+		// Extract tag from snapshot filename (remove path and _snapshot.json suffix)
+		const filename = path.basename(snapshotPath, '.json');
+		const tag = filename.replace('_snapshot', '');
+		content += `import m${idx.toString().padStart(4, '0')} from './${tag}.sql';\n`;
 	});
 
-	content += `
-  export default {
-    journal,
-    migrations: {
-      ${
-		journal.entries
-			.map((it) => `m${it.idx.toString().padStart(4, '0')}`)
-			.join(',\n')
-	}
-    }
-  }
-  `;
+	content += `\n  export default {\n    migrations: {\n`;
+	orderedSnapshots.forEach((_, idx) => {
+		content += `      m${idx.toString().padStart(4, '0')},\n`;
+	});
+	content += `    }\n  }\n  `;
 	return content;
 };
 

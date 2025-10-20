@@ -60,24 +60,93 @@ export const assertV1OutFolder = (out: string) => {
 	}
 };
 
-export type Journal = {
-	version: string;
-	dialect: Dialect;
-	entries: {
-		idx: number;
-		version: string;
-		when: number;
-		tag: string;
-		breakpoints: boolean;
-	}[];
-};
 
-export const dryJournal = (dialect: Dialect): Journal => {
-	return {
-		version: snapshotVersion,
-		dialect,
-		entries: [],
+/**
+ * Builds an ordered chain of migration snapshots by following prevId references.
+ *
+ * Algorithm:
+ * 1. List all snapshot JSON files in meta/ folder
+ * 2. Find root snapshot (prevId === originUUID or empty)
+ * 3. Build chain by following prevId references
+ * 4. If multiple snapshots have same prevId, sort by timestamp from filename
+ *
+ * @param metaFolder - Path to the meta folder containing snapshots
+ * @returns Ordered array of snapshot paths from oldest to newest
+ *
+ * TODO: Future enhancement - detect if concurrent migrations modified same schema entities.
+ * If two migrations with same prevId touch the same tables/columns, we should show an error
+ * to prevent potential data conflicts. This requires analyzing the snapshot diffs.
+ */
+export const buildSnapshotChain = (metaFolder: string): string[] => {
+	// Extract timestamp from filename (format: <timestamp>_snapshot.json)
+	const getTimestamp = (filename: string): number => {
+		const match = filename.match(/^(\d+)_/);
+		return match ? parseInt(match[1]) : 0;
 	};
+
+	// Read all JSON files except _journal.json
+	const files = readdirSync(metaFolder)
+		.filter((file) => file.endsWith('.json') && !file.startsWith('_'))
+		.map((file) => join(metaFolder, file));
+
+	if (files.length === 0) {
+		return [];
+	}
+
+	// Parse all snapshots and build adjacency map: prevId -> [{path, timestamp, id}]
+	const snapshotMap = new Map<string, Array<{ path: string; timestamp: number; id: string }>>();
+	const snapshotsById = new Map<string, { path: string; prevId: string }>();
+
+	for (const file of files) {
+		try {
+			const content = JSON.parse(readFileSync(file).toString());
+			const id = content.id;
+			const prevId = content.prevId || '';
+			const timestamp = getTimestamp(file);
+
+			snapshotsById.set(id, { path: file, prevId });
+
+			if (!snapshotMap.has(prevId)) {
+				snapshotMap.set(prevId, []);
+			}
+			snapshotMap.get(prevId)!.push({ path: file, timestamp, id });
+		} catch (e) {
+			console.error(`Error parsing snapshot ${file}:`, e);
+		}
+	}
+
+	// Find root(s) - snapshots with prevId === originUUID or ''
+	const roots = snapshotMap.get('00000000-0000-0000-0000-000000000000') ||
+	              snapshotMap.get('') || [];
+
+	if (roots.length === 0) {
+		console.warn('No root snapshot found (prevId should be originUUID)');
+		return [];
+	}
+
+	// Build chain by traversing from root
+	const orderedSnapshots: string[] = [];
+
+	const traverse = (currentId: string) => {
+		const children = snapshotMap.get(currentId) || [];
+
+		// Sort siblings by timestamp if multiple exist
+		children.sort((a, b) => a.timestamp - b.timestamp);
+
+		for (const child of children) {
+			orderedSnapshots.push(child.path);
+			traverse(child.id);
+		}
+	};
+
+	// Start traversal from each root (sorted by timestamp)
+	roots.sort((a, b) => a.timestamp - b.timestamp);
+	for (const root of roots) {
+		orderedSnapshots.push(root.path);
+		traverse(root.id);
+	}
+
+	return orderedSnapshots;
 };
 
 // export const preparePushFolder = (dialect: Dialect) => {
@@ -95,21 +164,14 @@ export const dryJournal = (dialect: Dialect): Journal => {
 
 export const prepareOutFolder = (out: string, dialect: Dialect) => {
 	const meta = join(out, 'meta');
-	const journalPath = join(meta, '_journal.json');
 
 	if (!existsSync(join(out, 'meta'))) {
 		mkdirSync(meta, { recursive: true });
-		writeFileSync(journalPath, JSON.stringify(dryJournal(dialect)));
 	}
 
-	const journal = JSON.parse(readFileSync(journalPath).toString());
+	const snapshots = buildSnapshotChain(meta);
 
-	const snapshots = readdirSync(meta)
-		.filter((it) => !it.startsWith('_'))
-		.map((it) => join(meta, it));
-
-	snapshots.sort();
-	return { meta, snapshots, journal };
+	return { meta, snapshots };
 };
 
 const validatorForDialect = (dialect: Dialect) => {
@@ -194,7 +256,7 @@ export const prepareMigrationFolder = (
 	outFolder: string = 'drizzle',
 	dialect: Dialect,
 ) => {
-	const { snapshots, journal } = prepareOutFolder(outFolder, dialect);
+	const { snapshots } = prepareOutFolder(outFolder, dialect);
 	const report = validateWithReport(snapshots, dialect);
 	if (report.nonLatest.length > 0) {
 		console.log(
@@ -202,7 +264,7 @@ export const prepareMigrationFolder = (
 				.map((it) => {
 					return `${it}/snapshot.json is not of the latest version`;
 				})
-				.concat(`Run ${chalk.green.bold(`drizzle-kit up`)}`)
+				.concat(`Run ${chalk.green.bold(`wizzle up`)}`)
 				.join('\n'),
 		);
 		process.exit(0);
@@ -242,7 +304,7 @@ export const prepareMigrationFolder = (
 		process.exit(0);
 	}
 
-	return { snapshots, journal };
+	return { snapshots };
 };
 
 export const prepareMigrationMeta = (
