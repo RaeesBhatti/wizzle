@@ -78,3 +78,178 @@ Running with CLI options:
 ```shell
 npm run generate
 ```
+
+## Runtime Migrations
+
+Wizzle provides runtime migrators that work with snapshot chains instead of journal files. This makes wizzle fully independent from drizzle-orm's migration system.
+
+### How it works
+
+Unlike drizzle-orm's runtime migrator which relies on `_journal.json`, wizzle's runtime migrator:
+- Uses snapshot chains to determine migration order by following `prevId` references
+- Reads migration metadata directly from snapshot files
+- Provides detailed logging for each migration being applied
+- Maintains the same external API as drizzle-orm for easy migration
+
+### Installation
+
+```bash
+npm install wizzle drizzle-orm
+```
+
+### Usage
+
+Import the migrator for your database driver and call it with your drizzle database instance:
+
+#### PostgreSQL (node-postgres)
+
+```typescript
+import { drizzle } from 'drizzle-orm/node-postgres';
+import { migrate } from 'wizzle/migrator/node-postgres';
+import { Pool } from 'pg';
+
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const db = drizzle(pool);
+
+// Run migrations
+await migrate(db, { migrationsFolder: './drizzle' });
+```
+
+#### PostgreSQL (postgres.js)
+
+```typescript
+import { drizzle } from 'drizzle-orm/postgres-js';
+import { migrate } from 'wizzle/migrator/postgres-js';
+import postgres from 'postgres';
+
+const sql = postgres(process.env.DATABASE_URL, { max: 1 });
+const db = drizzle(sql);
+
+await migrate(db, { migrationsFolder: './drizzle' });
+```
+
+#### MySQL (mysql2)
+
+```typescript
+import { drizzle } from 'drizzle-orm/mysql2';
+import { migrate } from 'wizzle/migrator/mysql2';
+import mysql from 'mysql2/promise';
+
+const connection = await mysql.createConnection(process.env.DATABASE_URL);
+const db = drizzle(connection);
+
+await migrate(db, { migrationsFolder: './drizzle' });
+```
+
+#### SQLite (better-sqlite3)
+
+```typescript
+import { drizzle } from 'drizzle-orm/better-sqlite3';
+import { migrate } from 'wizzle/migrator/better-sqlite3';
+import Database from 'better-sqlite3';
+
+const sqlite = new Database('sqlite.db');
+const db = drizzle(sqlite);
+
+await migrate(db, { migrationsFolder: './drizzle' });
+```
+
+#### SQLite (libsql)
+
+```typescript
+import { drizzle } from 'drizzle-orm/libsql';
+import { migrate } from 'wizzle/migrator/libsql';
+import { createClient } from '@libsql/client';
+
+const client = createClient({ url: 'file:local.db' });
+const db = drizzle(client);
+
+await migrate(db, { migrationsFolder: './drizzle' });
+```
+
+### Supported Drivers
+
+Wizzle supports all major database drivers:
+
+#### PostgreSQL
+- `wizzle/migrator/node-postgres` - node-postgres (pg)
+- `wizzle/migrator/postgres-js` - postgres.js
+- `wizzle/migrator/neon-serverless` - Neon serverless
+- `wizzle/migrator/neon-http` - Neon HTTP
+- `wizzle/migrator/pglite` - PGlite
+- `wizzle/migrator/pg-proxy` - PostgreSQL proxy
+- `wizzle/migrator/vercel-postgres` - Vercel Postgres
+- `wizzle/migrator/xata-http` - Xata HTTP
+- `wizzle/migrator/aws-data-api-pg` - AWS Data API for PostgreSQL
+
+#### MySQL
+- `wizzle/migrator/mysql2` - mysql2
+- `wizzle/migrator/mysql-proxy` - MySQL proxy
+- `wizzle/migrator/planetscale-serverless` - PlanetScale serverless
+- `wizzle/migrator/tidb-serverless` - TiDB serverless
+
+#### SQLite
+- `wizzle/migrator/better-sqlite3` - better-sqlite3
+- `wizzle/migrator/libsql` - libSQL
+- `wizzle/migrator/bun-sqlite` - Bun SQLite
+- `wizzle/migrator/bun-sql` - Bun SQL
+- `wizzle/migrator/sqlite-proxy` - SQLite proxy
+- `wizzle/migrator/sql-js` - sql.js
+- `wizzle/migrator/d1` - Cloudflare D1
+- `wizzle/migrator/durable-sqlite` - Durable SQLite
+- `wizzle/migrator/expo-sqlite` - Expo SQLite
+- `wizzle/migrator/op-sqlite` - OP SQLite
+
+#### SingleStore
+- `wizzle/migrator/singlestore` - SingleStore
+- `wizzle/migrator/singlestore-proxy` - SingleStore proxy
+
+### Migration Configuration
+
+The `migrate` function accepts a configuration object:
+
+```typescript
+interface MigrationConfig {
+  migrationsFolder: string;      // Path to migrations folder (required)
+  migrationsTable?: string;       // Custom migrations table name (default: "__drizzle_migrations")
+  migrationsSchema?: string;      // Schema for migrations table (PostgreSQL only)
+}
+```
+
+Example with custom configuration:
+
+```typescript
+await migrate(db, {
+  migrationsFolder: './drizzle',
+  migrationsTable: 'my_migrations',
+  migrationsSchema: 'public', // PostgreSQL only
+});
+```
+
+### Migration Logging
+
+Wizzle provides detailed logging during migration:
+
+```
+Applying 3 migration(s)...
+  [1/3] 1234567890_bold_thor
+  [2/3] 1234567891_brave_loki
+  [3/3] 1234567892_wise_odin
+✓ 3 migration(s) applied successfully in 145ms
+```
+
+### Migrating from drizzle-orm migrators
+
+If you're currently using drizzle-orm's runtime migrators, switching to wizzle is straightforward:
+
+**Before (drizzle-orm):**
+```typescript
+import { migrate } from 'drizzle-orm/node-postgres/migrator';
+```
+
+**After (wizzle):**
+```typescript
+import { migrate } from 'wizzle/migrator/node-postgres';
+```
+
+The API remains identical - only the import path changes. Wizzle will use your existing migration files but read them via snapshot chains instead of the journal file.

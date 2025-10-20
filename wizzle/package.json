@@ -84,7 +84,7 @@
 		"dockerode": "^4.0.6",
 		"dotenv": "^16.0.3",
 		"drizzle-kit": "0.25.0-b1faa33",
-		"drizzle-orm": "workspace:./drizzle-orm/dist",
+		"drizzle-orm": "workspace:../drizzle-orm/dist",
 		"env-paths": "^3.0.0",
 		"esbuild-node-externals": "^1.9.0",
 		"eslint": "^8.57.0",
@@ -141,6 +141,306 @@
 			},
 			"types": "./api.d.mts",
 			"default": "./api.mjs"
+		},
+		"./migrator/node-postgres": {
+			"import": {
+				"types": "./runtime/drivers/node-postgres.d.mts",
+				"default": "./runtime/drivers/node-postgres.mjs"
+			},
+			"require": {
+				"types": "./runtime/drivers/node-postgres.d.ts",
+				"default": "./runtime/drivers/node-postgres.js"
+			},
+			"types": "./runtime/drivers/node-postgres.d.mts",
+			"default": "./runtime/drivers/node-postgres.mjs"
+		},
+		"./migrator/postgres-js": {
+			"import": {
+				"types": "./runtime/drivers/postgres-js.d.mts",
+				"default": "./runtime/drivers/postgres-js.mjs"
+			},
+			"require": {
+				"types": "./runtime/drivers/postgres-js.d.ts",
+				"default": "./runtime/drivers/postgres-js.js"
+			},
+			"types": "./runtime/drivers/postgres-js.d.mts",
+			"default": "./runtime/drivers/postgres-js.mjs"
+		},
+		"./migrator/neon-serverless": {
+			"import": {
+				"types": "./runtime/drivers/neon-serverless.d.mts",
+				"default": "./runtime/drivers/neon-serverless.mjs"
+			},
+			"require": {
+				"types": "./runtime/drivers/neon-serverless.d.ts",
+				"default": "./runtime/drivers/neon-serverless.js"
+			},
+			"types": "./runtime/drivers/neon-serverless.d.mts",
+			"default": "./runtime/drivers/neon-serverless.mjs"
+		},
+		"./migrator/neon-http": {
+			"import": {
+				"types": "./runtime/drivers/neon-http.d.mts",
+				"default": "./runtime/drivers/neon-http.mjs"
+			},
+			"require": {
+				"types": "./runtime/drivers/neon-http.d.ts",
+				"default": "./runtime/drivers/neon-http.js"
+			},
+			"types": "./runtime/drivers/neon-http.d.mts",
+			"default": "./runtime/drivers/neon-http.mjs"
+		},
+		"./migrator/pglite": {
+			"import": {
+				"types": "./runtime/drivers/pglite.d.mts",
+				"default": "./runtime/drivers/pglite.mjs"
+			},
+			"require": {
+				"types": "./runtime/drivers/pglite.d.ts",
+				"default": "./runtime/drivers/pglite.js"
+			},
+			"types": "./runtime/drivers/pglite.d.mts",
+			"default": "./runtime/drivers/pglite.mjs"
+		},
+		"./migrator/pg-proxy": {
+			"import": {
+				"types": "./runtime/drivers/pg-proxy.d.mts",
+				"default": "./runtime/drivers/pg-proxy.mjs"
+			},
+			"require": {
+				"types": "./runtime/drivers/pg-proxy.d.ts",
+				"default": "./runtime/drivers/pg-proxy.js"
+			},
+			"types": "./runtime/drivers/pg-proxy.d.mts",
+			"default": "./runtime/drivers/pg-proxy.mjs"
+		},
+		"./migrator/vercel-postgres": {
+			"import": {
+				"types": "./runtime/drivers/vercel-postgres.d.mts",
+				"default": "./runtime/drivers/vercel-postgres.mjs"
+			},
+			"require": {
+				"types": "./runtime/drivers/vercel-postgres.d.ts",
+				"default": "./runtime/drivers/vercel-postgres.js"
+			},
+			"types": "./runtime/drivers/vercel-postgres.d.mts",
+			"default": "./runtime/drivers/vercel-postgres.mjs"
+		},
+		"./migrator/xata-http": {
+			"import": {
+				"types": "./runtime/drivers/xata-http.d.mts",
+				"default": "./runtime/drivers/xata-http.mjs"
+			},
+			"require": {
+				"types": "./runtime/drivers/xata-http.d.ts",
+				"default": "./runtime/drivers/xata-http.js"
+			},
+			"types": "./runtime/drivers/xata-http.d.mts",
+			"default": "./runtime/drivers/xata-http.mjs"
+		},
+		"./migrator/aws-data-api-pg": {
+			"import": {
+				"types": "./runtime/drivers/aws-data-api-pg.d.mts",
+				"default": "./runtime/drivers/aws-data-api-pg.mjs"
+			},
+			"require": {
+				"types": "./runtime/drivers/aws-data-api-pg.d.ts",
+				"default": "./runtime/drivers/aws-data-api-pg.js"
+			},
+			"types": "./runtime/drivers/aws-data-api-pg.d.mts",
+			"default": "./runtime/drivers/aws-data-api-pg.mjs"
+		},
+		"./migrator/mysql2": {
+			"import": {
+				"types": "./runtime/drivers/mysql2.d.mts",
+				"default": "./runtime/drivers/mysql2.mjs"
+			},
+			"require": {
+				"types": "./runtime/drivers/mysql2.d.ts",
+				"default": "./runtime/drivers/mysql2.js"
+			},
+			"types": "./runtime/drivers/mysql2.d.mts",
+			"default": "./runtime/drivers/mysql2.mjs"
+		},
+		"./migrator/mysql-proxy": {
+			"import": {
+				"types": "./runtime/drivers/mysql-proxy.d.mts",
+				"default": "./runtime/drivers/mysql-proxy.mjs"
+			},
+			"require": {
+				"types": "./runtime/drivers/mysql-proxy.d.ts",
+				"default": "./runtime/drivers/mysql-proxy.js"
+			},
+			"types": "./runtime/drivers/mysql-proxy.d.mts",
+			"default": "./runtime/drivers/mysql-proxy.mjs"
+		},
+		"./migrator/planetscale-serverless": {
+			"import": {
+				"types": "./runtime/drivers/planetscale-serverless.d.mts",
+				"default": "./runtime/drivers/planetscale-serverless.mjs"
+			},
+			"require": {
+				"types": "./runtime/drivers/planetscale-serverless.d.ts",
+				"default": "./runtime/drivers/planetscale-serverless.js"
+			},
+			"types": "./runtime/drivers/planetscale-serverless.d.mts",
+			"default": "./runtime/drivers/planetscale-serverless.mjs"
+		},
+		"./migrator/tidb-serverless": {
+			"import": {
+				"types": "./runtime/drivers/tidb-serverless.d.mts",
+				"default": "./runtime/drivers/tidb-serverless.mjs"
+			},
+			"require": {
+				"types": "./runtime/drivers/tidb-serverless.d.ts",
+				"default": "./runtime/drivers/tidb-serverless.js"
+			},
+			"types": "./runtime/drivers/tidb-serverless.d.mts",
+			"default": "./runtime/drivers/tidb-serverless.mjs"
+		},
+		"./migrator/better-sqlite3": {
+			"import": {
+				"types": "./runtime/drivers/better-sqlite3.d.mts",
+				"default": "./runtime/drivers/better-sqlite3.mjs"
+			},
+			"require": {
+				"types": "./runtime/drivers/better-sqlite3.d.ts",
+				"default": "./runtime/drivers/better-sqlite3.js"
+			},
+			"types": "./runtime/drivers/better-sqlite3.d.mts",
+			"default": "./runtime/drivers/better-sqlite3.mjs"
+		},
+		"./migrator/libsql": {
+			"import": {
+				"types": "./runtime/drivers/libsql.d.mts",
+				"default": "./runtime/drivers/libsql.mjs"
+			},
+			"require": {
+				"types": "./runtime/drivers/libsql.d.ts",
+				"default": "./runtime/drivers/libsql.js"
+			},
+			"types": "./runtime/drivers/libsql.d.mts",
+			"default": "./runtime/drivers/libsql.mjs"
+		},
+		"./migrator/bun-sqlite": {
+			"import": {
+				"types": "./runtime/drivers/bun-sqlite.d.mts",
+				"default": "./runtime/drivers/bun-sqlite.mjs"
+			},
+			"require": {
+				"types": "./runtime/drivers/bun-sqlite.d.ts",
+				"default": "./runtime/drivers/bun-sqlite.js"
+			},
+			"types": "./runtime/drivers/bun-sqlite.d.mts",
+			"default": "./runtime/drivers/bun-sqlite.mjs"
+		},
+		"./migrator/bun-sql": {
+			"import": {
+				"types": "./runtime/drivers/bun-sql.d.mts",
+				"default": "./runtime/drivers/bun-sql.mjs"
+			},
+			"require": {
+				"types": "./runtime/drivers/bun-sql.d.ts",
+				"default": "./runtime/drivers/bun-sql.js"
+			},
+			"types": "./runtime/drivers/bun-sql.d.mts",
+			"default": "./runtime/drivers/bun-sql.mjs"
+		},
+		"./migrator/sqlite-proxy": {
+			"import": {
+				"types": "./runtime/drivers/sqlite-proxy.d.mts",
+				"default": "./runtime/drivers/sqlite-proxy.mjs"
+			},
+			"require": {
+				"types": "./runtime/drivers/sqlite-proxy.d.ts",
+				"default": "./runtime/drivers/sqlite-proxy.js"
+			},
+			"types": "./runtime/drivers/sqlite-proxy.d.mts",
+			"default": "./runtime/drivers/sqlite-proxy.mjs"
+		},
+		"./migrator/sql-js": {
+			"import": {
+				"types": "./runtime/drivers/sql-js.d.mts",
+				"default": "./runtime/drivers/sql-js.mjs"
+			},
+			"require": {
+				"types": "./runtime/drivers/sql-js.d.ts",
+				"default": "./runtime/drivers/sql-js.js"
+			},
+			"types": "./runtime/drivers/sql-js.d.mts",
+			"default": "./runtime/drivers/sql-js.mjs"
+		},
+		"./migrator/d1": {
+			"import": {
+				"types": "./runtime/drivers/d1.d.mts",
+				"default": "./runtime/drivers/d1.mjs"
+			},
+			"require": {
+				"types": "./runtime/drivers/d1.d.ts",
+				"default": "./runtime/drivers/d1.js"
+			},
+			"types": "./runtime/drivers/d1.d.mts",
+			"default": "./runtime/drivers/d1.mjs"
+		},
+		"./migrator/durable-sqlite": {
+			"import": {
+				"types": "./runtime/drivers/durable-sqlite.d.mts",
+				"default": "./runtime/drivers/durable-sqlite.mjs"
+			},
+			"require": {
+				"types": "./runtime/drivers/durable-sqlite.d.ts",
+				"default": "./runtime/drivers/durable-sqlite.js"
+			},
+			"types": "./runtime/drivers/durable-sqlite.d.mts",
+			"default": "./runtime/drivers/durable-sqlite.mjs"
+		},
+		"./migrator/expo-sqlite": {
+			"import": {
+				"types": "./runtime/drivers/expo-sqlite.d.mts",
+				"default": "./runtime/drivers/expo-sqlite.mjs"
+			},
+			"require": {
+				"types": "./runtime/drivers/expo-sqlite.d.ts",
+				"default": "./runtime/drivers/expo-sqlite.js"
+			},
+			"types": "./runtime/drivers/expo-sqlite.d.mts",
+			"default": "./runtime/drivers/expo-sqlite.mjs"
+		},
+		"./migrator/op-sqlite": {
+			"import": {
+				"types": "./runtime/drivers/op-sqlite.d.mts",
+				"default": "./runtime/drivers/op-sqlite.mjs"
+			},
+			"require": {
+				"types": "./runtime/drivers/op-sqlite.d.ts",
+				"default": "./runtime/drivers/op-sqlite.js"
+			},
+			"types": "./runtime/drivers/op-sqlite.d.mts",
+			"default": "./runtime/drivers/op-sqlite.mjs"
+		},
+		"./migrator/singlestore": {
+			"import": {
+				"types": "./runtime/drivers/singlestore.d.mts",
+				"default": "./runtime/drivers/singlestore.mjs"
+			},
+			"require": {
+				"types": "./runtime/drivers/singlestore.d.ts",
+				"default": "./runtime/drivers/singlestore.js"
+			},
+			"types": "./runtime/drivers/singlestore.d.mts",
+			"default": "./runtime/drivers/singlestore.mjs"
+		},
+		"./migrator/singlestore-proxy": {
+			"import": {
+				"types": "./runtime/drivers/singlestore-proxy.d.mts",
+				"default": "./runtime/drivers/singlestore-proxy.mjs"
+			},
+			"require": {
+				"types": "./runtime/drivers/singlestore-proxy.d.ts",
+				"default": "./runtime/drivers/singlestore-proxy.js"
+			},
+			"types": "./runtime/drivers/singlestore-proxy.d.mts",
+			"default": "./runtime/drivers/singlestore-proxy.mjs"
 		}
 	}
 }

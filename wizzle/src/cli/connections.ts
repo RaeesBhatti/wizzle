@@ -49,7 +49,7 @@ export const preparePostgresDB = async (
 			const { AwsDataApiSession, drizzle } = await import(
 				'drizzle-orm/aws-data-api/pg'
 			);
-			const { migrate } = await import('drizzle-orm/aws-data-api/pg/migrator');
+			const { migrate } = await import('../runtime/drivers/aws-data-api-pg');
 			const { PgDialect } = await import('drizzle-orm/pg-core');
 
 			const config: AwsDataApiSessionOptions = {
@@ -121,7 +121,7 @@ export const preparePostgresDB = async (
 			assertPackages('@electric-sql/pglite');
 			const { PGlite, types } = await import('@electric-sql/pglite');
 			const { drizzle } = await import('drizzle-orm/pglite');
-			const { migrate } = await import('drizzle-orm/pglite/migrator');
+			const { migrate } = await import('../runtime/drivers/pglite');
 
 			const pglite = new PGlite(normalisePGliteUrl(credentials.url));
 			await pglite.waitReady;
@@ -180,7 +180,7 @@ export const preparePostgresDB = async (
 		console.log(withStyle.info(`Using 'pg' driver for database querying`));
 		const { default: pg } = await import('pg');
 		const { drizzle } = await import('drizzle-orm/node-postgres');
-		const { migrate } = await import('drizzle-orm/node-postgres/migrator');
+		const { migrate } = await import('../runtime/drivers/node-postgres');
 
 		const ssl = 'ssl' in credentials
 			? credentials.ssl === 'prefer'
@@ -273,7 +273,7 @@ export const preparePostgresDB = async (
 		const postgres = await import('postgres');
 
 		const { drizzle } = await import('drizzle-orm/postgres-js');
-		const { migrate } = await import('drizzle-orm/postgres-js/migrator');
+		const { migrate } = await import('../runtime/drivers/postgres-js');
 
 		const client = 'url' in credentials
 			? postgres.default(credentials.url, { max: 1 })
@@ -335,7 +335,7 @@ export const preparePostgresDB = async (
 		);
 		const { VercelPool, types: pgTypes } = await import('@vercel/postgres');
 		const { drizzle } = await import('drizzle-orm/vercel-postgres');
-		const { migrate } = await import('drizzle-orm/vercel-postgres/migrator');
+		const { migrate } = await import('../runtime/drivers/vercel-postgres');
 		const ssl = 'ssl' in credentials
 			? credentials.ssl === 'prefer'
 					|| credentials.ssl === 'require'
@@ -435,7 +435,7 @@ export const preparePostgresDB = async (
 		);
 		const { Pool, neonConfig, types: pgTypes } = await import('@neondatabase/serverless');
 		const { drizzle } = await import('drizzle-orm/neon-serverless');
-		const { migrate } = await import('drizzle-orm/neon-serverless/migrator');
+		const { migrate } = await import('../runtime/drivers/neon-serverless');
 
 		const ssl = 'ssl' in credentials
 			? credentials.ssl === 'prefer'
@@ -649,7 +649,7 @@ export const connectToSingleStore = async (
 	if (await checkPackage('mysql2')) {
 		const { createConnection } = await import('mysql2/promise');
 		const { drizzle } = await import('drizzle-orm/singlestore');
-		const { migrate } = await import('drizzle-orm/singlestore/migrator');
+		const { migrate } = await import('../runtime/drivers/singlestore');
 
 		const connection = result.url
 			? await createConnection(result.url)
@@ -748,7 +748,7 @@ export const connectToMySQL = async (
 	if (await checkPackage('mysql2')) {
 		const { createConnection } = await import('mysql2/promise');
 		const { drizzle } = await import('drizzle-orm/mysql2');
-		const { migrate } = await import('drizzle-orm/mysql2/migrator');
+		const { migrate } = await import('../runtime/drivers/mysql2');
 
 		const connection = result.url
 			? await createConnection(result.url)
@@ -819,7 +819,7 @@ export const connectToMySQL = async (
 		const { Client } = await import('@planetscale/database');
 		const { drizzle } = await import('drizzle-orm/planetscale-serverless');
 		const { migrate } = await import(
-			'drizzle-orm/planetscale-serverless/migrator'
+			'../runtime/drivers/planetscale-serverless'
 		);
 
 		const connection = new Client(result);
@@ -1065,7 +1065,7 @@ export const connectToSQLite = async (
 	if (await checkPackage('@libsql/client')) {
 		const { createClient } = await import('@libsql/client');
 		const { drizzle } = await import('drizzle-orm/libsql');
-		const { migrate } = await import('drizzle-orm/libsql/migrator');
+		const { migrate } = await import('../runtime/drivers/libsql');
 
 		const client = createClient({
 			url: normaliseSQLiteUrl(credentials.url, 'libsql'),
@@ -1126,7 +1126,7 @@ export const connectToSQLite = async (
 	if (await checkPackage('better-sqlite3')) {
 		const { default: Database } = await import('better-sqlite3');
 		const { drizzle } = await import('drizzle-orm/better-sqlite3');
-		const { migrate } = await import('drizzle-orm/better-sqlite3/migrator');
+		const { migrate } = await import('../runtime/drivers/better-sqlite3');
 
 		const sqlite = new Database(
 			normaliseSQLiteUrl(credentials.url, 'better-sqlite'),
@@ -1210,7 +1210,7 @@ export const connectToLibSQL = async (credentials: LibSQLCredentials): Promise<
 	if (await checkPackage('@libsql/client')) {
 		const { createClient } = await import('@libsql/client');
 		const { drizzle } = await import('drizzle-orm/libsql');
-		const { migrate } = await import('drizzle-orm/libsql/migrator');
+		const { migrate } = await import('../runtime/drivers/libsql');
 
 		const client = createClient({
 			url: normaliseSQLiteUrl(credentials.url, 'libsql'),
