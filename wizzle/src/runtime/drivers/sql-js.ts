@@ -8,5 +8,9 @@ export function migrate<TSchema extends Record<string, unknown>>(
 ) {
 	const migrations = readMigrationFiles(config);
 	const internal = db as unknown as DrizzleInternal;
-	internal.dialect.migrate(migrations, internal.session, config);
+	const configWithDefaults = {
+		...config,
+		migrationsTable: config.migrationsTable ?? '__wizzle_migrations',
+	};
+	internal.dialect.migrate(migrations, internal.session, configWithDefaults);
 }

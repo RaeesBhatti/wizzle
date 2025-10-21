@@ -61,13 +61,13 @@ describe('PGlite runtime migrator integration', () => {
 		// Check that migrations table was created
 		const tablesResult = await pglite.query(`
 			SELECT tablename FROM pg_tables
-			WHERE schemaname = 'public' AND tablename = '__drizzle_migrations'
+			WHERE schemaname = 'public' AND tablename = '__wizzle_migrations'
 		`);
 		expect(tablesResult.rows).toHaveLength(1);
 
 		// Check that both migrations were applied
 		const migrationsResult = await pglite.query(
-			'SELECT * FROM __drizzle_migrations ORDER BY created_at',
+			'SELECT * FROM __wizzle_migrations ORDER BY created_at',
 		);
 		expect(migrationsResult.rows).toHaveLength(2);
 
@@ -114,7 +114,7 @@ describe('PGlite runtime migrator integration', () => {
 		});
 
 		// Should still have only 2 migration records
-		const result = await pglite.query('SELECT * FROM __drizzle_migrations');
+		const result = await pglite.query('SELECT * FROM __wizzle_migrations');
 		expect(result.rows).toHaveLength(2);
 	});
 
@@ -133,7 +133,7 @@ describe('PGlite runtime migrator integration', () => {
 			migrationsSchema: 'public',
 		});
 
-		// Check that custom table was created
+		// Check that custom table was created (not the default __wizzle_migrations)
 		const tablesResult = await pglite.query(`
 			SELECT tablename FROM pg_tables
 			WHERE schemaname = 'public' AND tablename = 'my_migrations'

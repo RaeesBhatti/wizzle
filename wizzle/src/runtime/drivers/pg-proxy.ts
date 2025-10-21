@@ -15,7 +15,7 @@ export async function migrate<TSchema extends Record<string, unknown>>(
 	// Note: The 'tag' column is for debugging/readability only.
 	// Migration logic uses only 'created_at' to determine which migrations to apply.
 	const migrationTableCreate = sql`
-		CREATE TABLE IF NOT EXISTS "drizzle"."__drizzle_migrations" (
+		CREATE TABLE IF NOT EXISTS "wizzle"."__wizzle_migrations" (
 			id SERIAL PRIMARY KEY,
 			hash text NOT NULL,
 			created_at numeric,
@@ -23,7 +23,7 @@ export async function migrate<TSchema extends Record<string, unknown>>(
 		)
 	`;
 
-	await db.execute(sql`CREATE SCHEMA IF NOT EXISTS "drizzle"`);
+	await db.execute(sql`CREATE SCHEMA IF NOT EXISTS "wizzle"`);
 	await db.execute(migrationTableCreate);
 
 	const dbMigrations = await db.execute<{
@@ -31,7 +31,7 @@ export async function migrate<TSchema extends Record<string, unknown>>(
 		hash: string;
 		created_at: string;
 	}>(
-		sql`SELECT id, hash, created_at FROM "drizzle"."__drizzle_migrations" ORDER BY created_at DESC LIMIT 1`,
+		sql`SELECT id, hash, created_at FROM "wizzle"."__wizzle_migrations" ORDER BY created_at DESC LIMIT 1`,
 	);
 
 	const lastDbMigration = dbMigrations[0] ?? undefined;
@@ -46,7 +46,7 @@ export async function migrate<TSchema extends Record<string, unknown>>(
 		) {
 			queriesToRun.push(
 				...migration.sql,
-				`INSERT INTO "drizzle"."__drizzle_migrations" ("hash", "created_at", "tag") VALUES('${migration.hash}', '${migration.folderMillis}', '${migration.tag}')`,
+				`INSERT INTO "wizzle"."__wizzle_migrations" ("hash", "created_at", "tag") VALUES('${migration.hash}', '${migration.folderMillis}', '${migration.tag}')`,
 			);
 		}
 	}

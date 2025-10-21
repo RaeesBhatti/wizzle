@@ -13,8 +13,8 @@ export async function migrate<TSchema extends Record<string, unknown>>(
 	const migrations = readMigrationFiles(config);
 
 	const migrationsTable = typeof config === 'string'
-		? '__drizzle_migrations'
-		: config.migrationsTable ?? '__drizzle_migrations';
+		? '__wizzle_migrations'
+		: config.migrationsTable ?? '__wizzle_migrations';
 
 	// Note: The 'tag' column is for debugging/readability only.
 	// Migration logic uses only 'created_at' to determine which migrations to apply.

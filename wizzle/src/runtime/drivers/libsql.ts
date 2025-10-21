@@ -9,7 +9,7 @@ export async function migrate<TSchema extends Record<string, unknown>>(
 ) {
 	const migrations = readMigrationFiles(config);
 	const internal = db as unknown as DrizzleInternal;
-	const migrationsTable = config.migrationsTable ?? '__drizzle_migrations';
+	const migrationsTable = config.migrationsTable ?? '__wizzle_migrations';
 
 	// Note: The 'tag' column is for debugging/readability only.
 	// Migration logic uses only 'created_at' to determine which migrations to apply.

@@ -49,7 +49,7 @@ export async function migrate<
 
 	db.transaction((tx) => {
 		try {
-			const migrationsTable = '__drizzle_migrations';
+			const migrationsTable = '__wizzle_migrations';
 
 			// Note: The 'tag' column is for debugging/readability only.
 			// Migration logic uses only 'created_at' to determine which migrations to apply.

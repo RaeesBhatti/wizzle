@@ -23,13 +23,13 @@ describe('SQLite runtime migrator', () => {
 
 		// Check that migrations table was created
 		const tables = sqlite
-			.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='__drizzle_migrations'")
+			.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='__wizzle_migrations'")
 			.all();
 		expect(tables).toHaveLength(1);
 
 		// Check that both migrations were applied
 		const migrations = sqlite
-			.prepare('SELECT * FROM __drizzle_migrations ORDER BY created_at')
+			.prepare('SELECT * FROM __wizzle_migrations ORDER BY created_at')
 			.all() as any[];
 		expect(migrations).toHaveLength(2);
 
@@ -64,7 +64,7 @@ describe('SQLite runtime migrator', () => {
 
 		// Should still have only 2 migration records
 		const migrations = sqlite
-			.prepare('SELECT * FROM __drizzle_migrations')
+			.prepare('SELECT * FROM __wizzle_migrations')
 			.all();
 		expect(migrations).toHaveLength(2);
 	});
@@ -75,7 +75,7 @@ describe('SQLite runtime migrator', () => {
 			migrationsTable: 'custom_migrations',
 		});
 
-		// Check that custom table was created
+		// Check that custom table was created (not the default __wizzle_migrations)
 		const tables = sqlite
 			.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='custom_migrations'")
 			.all();
@@ -104,7 +104,7 @@ describe('LibSQL runtime migrator', () => {
 
 		// Check migrations were applied
 		const result = await client.execute(
-			'SELECT * FROM __drizzle_migrations ORDER BY created_at',
+			'SELECT * FROM __wizzle_migrations ORDER BY created_at',
 		);
 		expect(result.rows).toHaveLength(2);
 		expect(result.rows[0].created_at).toBe(1700000000000);
