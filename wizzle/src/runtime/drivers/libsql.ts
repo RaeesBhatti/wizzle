@@ -11,11 +11,14 @@ export async function migrate<TSchema extends Record<string, unknown>>(
 	const internal = db as unknown as DrizzleInternal;
 	const migrationsTable = config.migrationsTable ?? '__drizzle_migrations';
 
+	// Note: The 'tag' column is for debugging/readability only.
+	// Migration logic uses only 'created_at' to determine which migrations to apply.
 	const migrationTableCreate = sql`
 		CREATE TABLE IF NOT EXISTS ${sql.identifier(migrationsTable)} (
 			id SERIAL PRIMARY KEY,
 			hash text NOT NULL,
-			created_at numeric
+			created_at numeric,
+			tag text
 		)
 	`;
 	await internal.session.run(migrationTableCreate);
@@ -29,6 +32,7 @@ export async function migrate<TSchema extends Record<string, unknown>>(
 	const statementToBatch = [];
 
 	for (const migration of migrations) {
+		// Migration decision logic: only compare created_at timestamps
 		if (!lastDbMigration || Number(lastDbMigration[2])! < migration.folderMillis) {
 			for (const stmt of migration.sql) {
 				statementToBatch.push(db.run(sql.raw(stmt)));
@@ -38,7 +42,7 @@ export async function migrate<TSchema extends Record<string, unknown>>(
 				db.run(
 					sql`INSERT INTO ${
 						sql.identifier(migrationsTable)
-					} ("hash", "created_at") VALUES(${migration.hash}, ${migration.folderMillis})`,
+					} ("hash", "created_at", "tag") VALUES(${migration.hash}, ${migration.folderMillis}, ${migration.tag})`,
 				),
 			);
 		}

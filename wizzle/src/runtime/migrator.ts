@@ -19,6 +19,7 @@ export interface MigrationMeta {
 	folderMillis: number;
 	hash: string;
 	bps: boolean;
+	tag: string; // Migration folder name (e.g., "1725358702427_create_users") - for debugging/readability only
 }
 
 /**
@@ -90,6 +91,7 @@ export function readMigrationFiles(config: MigrationConfig): MigrationMeta[] {
 				bps: breakpoints,
 				folderMillis: timestamp,
 				hash: crypto.createHash('sha256').update(query).digest('hex'),
+				tag, // Store folder name for debugging/readability
 			});
 		} catch (error) {
 			throw new Error(`Failed to read migration ${tag}: ${error}`);

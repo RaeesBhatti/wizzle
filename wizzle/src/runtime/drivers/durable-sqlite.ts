@@ -29,6 +29,7 @@ function readMigrationFiles({ journal, migrations }: MigrationConfig): Migration
 				bps: journalEntry.breakpoints,
 				folderMillis: journalEntry.when,
 				hash: '',
+				tag: journalEntry.tag, // Store tag for debugging/readability
 			});
 		} catch {
 			throw new Error(`Failed to parse migration: ${journalEntry.tag}`);
@@ -50,11 +51,14 @@ export async function migrate<
 		try {
 			const migrationsTable = '__drizzle_migrations';
 
+			// Note: The 'tag' column is for debugging/readability only.
+			// Migration logic uses only 'created_at' to determine which migrations to apply.
 			const migrationTableCreate = sql`
 				CREATE TABLE IF NOT EXISTS ${sql.identifier(migrationsTable)} (
 					id SERIAL PRIMARY KEY,
 					hash text NOT NULL,
-					created_at numeric
+					created_at numeric,
+					tag text
 				)
 			`;
 			db.run(migrationTableCreate);
@@ -66,6 +70,7 @@ export async function migrate<
 			const lastDbMigration = dbMigrations[0] ?? undefined;
 
 			for (const migration of migrations) {
+				// Migration decision logic: only compare created_at timestamps
 				if (!lastDbMigration || Number(lastDbMigration[2])! < migration.folderMillis) {
 					for (const stmt of migration.sql) {
 						db.run(sql.raw(stmt));
@@ -73,7 +78,7 @@ export async function migrate<
 					db.run(
 						sql`INSERT INTO ${
 							sql.identifier(migrationsTable)
-						} ("hash", "created_at") VALUES(${migration.hash}, ${migration.folderMillis})`,
+						} ("hash", "created_at", "tag") VALUES(${migration.hash}, ${migration.folderMillis}, ${migration.tag})`,
 					);
 				}
 			}

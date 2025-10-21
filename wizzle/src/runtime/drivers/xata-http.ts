@@ -17,11 +17,14 @@ import { readMigrationFiles } from '../migrator';
 	const migrations = readMigrationFiles(config);
 	const internal = db as unknown as DrizzleInternal;
 	const migrationsTable = config.migrationsTable ?? '__drizzle_migrations';
+	// Note: The 'tag' column is for debugging/readability only.
+	// Migration logic uses only 'created_at' to determine which migrations to apply.
 	const migrationTableCreate = sql`
 		CREATE TABLE IF NOT EXISTS ${sql.identifier(migrationsTable)} (
 			id SERIAL PRIMARY KEY,
 			hash text NOT NULL,
-			created_at bigint
+			created_at bigint,
+			tag text
 		)
 	`;
 	await internal.session.execute(migrationTableCreate);
@@ -37,6 +40,7 @@ import { readMigrationFiles } from '../migrator';
 	const lastDbMigration = dbMigrations[0];
 
 	for await (const migration of migrations) {
+		// Migration decision logic: only compare created_at timestamps
 		if (!lastDbMigration || Number(lastDbMigration.created_at) < migration.folderMillis) {
 			for (const stmt of migration.sql) {
 				await internal.session.execute(sql.raw(stmt));
@@ -45,7 +49,7 @@ import { readMigrationFiles } from '../migrator';
 			await internal.session.execute(
 				sql`insert into ${
 					sql.identifier(migrationsTable)
-				} ("hash", "created_at") values(${migration.hash}, ${migration.folderMillis})`,
+				} ("hash", "created_at", "tag") values(${migration.hash}, ${migration.folderMillis}, ${migration.tag})`,
 			);
 		}
 	}

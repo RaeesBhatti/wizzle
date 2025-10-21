@@ -12,11 +12,14 @@ export async function migrate<TSchema extends Record<string, unknown>>(
 ) {
 	const migrations = readMigrationFiles(config);
 
+	// Note: The 'tag' column is for debugging/readability only.
+	// Migration logic uses only 'created_at' to determine which migrations to apply.
 	const migrationTableCreate = sql`
 		CREATE TABLE IF NOT EXISTS "drizzle"."__drizzle_migrations" (
 			id SERIAL PRIMARY KEY,
 			hash text NOT NULL,
-			created_at numeric
+			created_at numeric,
+			tag text
 		)
 	`;
 
@@ -36,13 +39,14 @@ export async function migrate<TSchema extends Record<string, unknown>>(
 	const queriesToRun: string[] = [];
 
 	for (const migration of migrations) {
+		// Migration decision logic: only compare created_at timestamps
 		if (
 			!lastDbMigration
 			|| Number(lastDbMigration.created_at)! < migration.folderMillis
 		) {
 			queriesToRun.push(
 				...migration.sql,
-				`INSERT INTO "drizzle"."__drizzle_migrations" ("hash", "created_at") VALUES('${migration.hash}', '${migration.folderMillis}')`,
+				`INSERT INTO "drizzle"."__drizzle_migrations" ("hash", "created_at", "tag") VALUES('${migration.hash}', '${migration.folderMillis}', '${migration.tag}')`,
 			);
 		}
 	}
