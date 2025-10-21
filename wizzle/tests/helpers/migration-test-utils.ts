@@ -50,6 +50,10 @@ export function createMockSnapshot(options: {
 	if (dialect === 'postgresql') {
 		baseSnapshot.enums = {};
 		baseSnapshot.schemas = {};
+		baseSnapshot.sequences = {};
+		baseSnapshot.roles = {};
+		baseSnapshot.policies = {};
+		baseSnapshot.views = {};
 		baseSnapshot._meta.schemas = {};
 		baseSnapshot.tables[`public.${tableName}`] = {
 			name: tableName,

@@ -41,6 +41,7 @@
   "sequences": {},
   "roles": {},
   "policies": {},
+  "views": {},
   "_meta": {
     "schemas": {},
     "tables": {},
