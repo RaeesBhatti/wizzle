@@ -5,7 +5,7 @@ import { casing, casingType, prefix } from './common';
 export const cliConfigGenerate = object({
 	dialect: dialect.optional(),
 	schema: union([string(), string().array()]).optional(),
-	out: string().optional().default('./drizzle'),
+	out: string().optional().default('./wizzle'),
 	config: string().optional(),
 	name: string().optional(),
 	prefix: prefix.optional(),
@@ -40,7 +40,7 @@ export type PushParams = TypeOf<typeof pushParams>;
 export const pullParams = object({
 	config: string().optional(),
 	dialect: dialect,
-	out: string().optional().default('drizzle'),
+	out: string().optional().default('wizzle'),
 	tablesFilter: union([string(), string().array()]).optional(),
 	schemaFilter: union([string(), string().array()])
 		.optional()

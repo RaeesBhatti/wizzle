@@ -36,7 +36,7 @@ const optionDialect = string('dialect')
 	.desc(
 		`Database dialect: 'gel', 'postgresql', 'mysql', 'sqlite', 'turso' or 'singlestore'`,
 	);
-const optionOut = string().desc("Output folder, 'drizzle' by default");
+const optionOut = string().desc("Output folder, 'wizzle' by default");
 const optionConfig = string().desc('Path to drizzle config file');
 const optionBreakpoints = boolean().desc(
 	`Prepare SQL statements with breakpoints`,
@@ -654,7 +654,8 @@ export const generateFromJournalCommand = command({
 	name: 'generate-from-journal',
 	desc: 'Generate folder-based migrations from journal-based structure',
 	options: {
-		out: optionOut.default('drizzle'),
+		source: string().desc('Source folder with journal-based migrations').default('drizzle'),
+		out: optionOut.default('wizzle'),
 		dryRun: boolean()
 			.desc('Show what would be generated without making changes')
 			.default(false),
@@ -663,6 +664,7 @@ export const generateFromJournalCommand = command({
 	},
 	handler: async (opts) => {
 		await generateFromJournal({
+			source: opts.source,
 			out: opts.out,
 			dryRun: opts.dryRun,
 			casing: opts.casing as 'camel' | 'preserve',

@@ -133,7 +133,7 @@ export const prepareDropParams = async (
 		process.exit(1);
 	}
 
-	return { out: config.out || 'drizzle', bundle: config.driver === 'expo' };
+	return { out: config.out || 'wizzle', bundle: config.driver === 'expo' };
 };
 
 export type GenerateConfig = {
@@ -198,7 +198,7 @@ export const prepareGenerateConfig = async (
 		prefix,
 		breakpoints: breakpoints ?? true,
 		schema: schema,
-		out: out || 'drizzle',
+		out: out || 'wizzle',
 		bundle: driver === 'expo' || driver === 'durable-sqlite',
 		casing,
 		driver,
@@ -765,7 +765,7 @@ export const prepareStudioConfig = async (options: Record<string, unknown>) => {
 
 export const migrateConfig = object({
 	dialect,
-	out: string().optional().default('drizzle'),
+	out: string().optional().default('wizzle'),
 	migrations: configMigrations,
 });
 

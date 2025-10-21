@@ -121,7 +121,7 @@ export const casing = union([literal('camel'), literal('preserve')]).default(
 
 export const introspectParams = object({
 	schema: union([string(), string().array()]).optional(),
-	out: string().optional().default('./drizzle'),
+	out: string().optional().default('./wizzle'),
 	breakpoints: boolean().default(true),
 	tablesFilter: union([string(), string().array()]).optional(),
 	schemaFilter: union([string(), string().array()]).default(['public']),
@@ -135,7 +135,7 @@ export type Casing = TypeOf<typeof casing>;
 
 export const configIntrospectCliSchema = object({
 	schema: union([string(), string().array()]).optional(),
-	out: string().optional().default('./drizzle'),
+	out: string().optional().default('./wizzle'),
 	breakpoints: boolean().default(true),
 	tablesFilter: union([string(), string().array()]).optional(),
 	schemaFilter: union([string(), string().array()]).default(['public']),
@@ -146,7 +146,7 @@ export const configIntrospectCliSchema = object({
 
 export const configGenerateSchema = object({
 	schema: union([string(), string().array()]),
-	out: string().optional().default('./drizzle'),
+	out: string().optional().default('./wizzle'),
 	breakpoints: boolean().default(true),
 });
 

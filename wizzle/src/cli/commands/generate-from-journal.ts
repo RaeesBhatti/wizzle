@@ -18,6 +18,7 @@ export type Journal = {
 };
 
 export type GenerateOptions = {
+	source: string;
 	out: string;
 	dryRun?: boolean;
 	casing?: Casing;
@@ -138,12 +139,14 @@ export function detectHybridStructure(folder: string): boolean {
  * @param options - Generation options
  */
 export async function generateFromJournal(options: GenerateOptions): Promise<void> {
-	const { out, dryRun = false, casing = 'camel' } = options;
+	const { source, out, dryRun = false, casing = 'camel' } = options;
 
 	console.log(chalk.bold('\nGenerating folder-based migrations from journal...\n'));
+	console.log(chalk.blue(`Source: ${source}`));
+	console.log(chalk.blue(`Output: ${out}\n`));
 
 	// Validate journal structure
-	const validation = validateJournalStructure(out);
+	const validation = validateJournalStructure(source);
 
 	if (!validation.valid) {
 		console.error(chalk.red('❌ Invalid journal structure. Missing files:'));
@@ -156,14 +159,14 @@ export async function generateFromJournal(options: GenerateOptions): Promise<voi
 	const journal = validation.journal!;
 	console.log(chalk.blue(`Found ${journal.entries.length} migrations in journal`));
 
-	// Check for hybrid structure
-	if (detectHybridStructure(out)) {
-		console.log(chalk.yellow('\n⚠️  Warning: Detected both old and new migration formats.'));
-		console.log(chalk.yellow('   New migrations will be added alongside existing ones.\n'));
+	// Check for hybrid structure in source
+	if (detectHybridStructure(source)) {
+		console.log(chalk.yellow('\n⚠️  Warning: Detected both old and new migration formats in source.'));
+		console.log(chalk.yellow('   Only journal-based migrations will be converted.\n'));
 	}
 
-	// Get existing new-format migrations to avoid duplicates
-	const existingMigrations = new Set(buildSnapshotChain(out));
+	// Get existing new-format migrations in output folder to avoid duplicates
+	const existingMigrations = existsSync(out) ? new Set(buildSnapshotChain(out)) : new Set();
 
 	if (dryRun) {
 		console.log(chalk.cyan('\n🔍 Dry run mode - no files will be created:\n'));
@@ -192,9 +195,9 @@ export async function generateFromJournal(options: GenerateOptions): Promise<voi
 		}
 
 		// Read source files
-		const metaFolder = join(out, 'meta');
+		const metaFolder = join(source, 'meta');
 		const snapshotPath = join(metaFolder, `${prefix}_snapshot.json`);
-		const sqlPath = join(out, `${tag}.sql`);
+		const sqlPath = join(source, `${tag}.sql`);
 
 		const snapshotContent = readFileSync(snapshotPath, 'utf8');
 		const sqlContent = readFileSync(sqlPath, 'utf8');
@@ -239,12 +242,12 @@ export async function generateFromJournal(options: GenerateOptions): Promise<voi
 		console.log(chalk.cyan(`\nRun without --dry-run to generate the migrations.`));
 	} else {
 		console.log(chalk.green(`\n✅ Generation complete:`));
-		console.log(chalk.green(`   ${migratedCount} migrations generated`));
+		console.log(chalk.green(`   ${migratedCount} migrations generated in ${out}/`));
 		if (skippedCount > 0) {
 			console.log(chalk.yellow(`   ${skippedCount} migrations skipped (already exist)`));
 		}
 		console.log(chalk.blue(`\n📁 Old migration files preserved in:`));
-		console.log(chalk.blue(`   ${out}/meta/`));
-		console.log(chalk.blue(`   ${out}/*.sql`));
+		console.log(chalk.blue(`   ${source}/meta/`));
+		console.log(chalk.blue(`   ${source}/*.sql`));
 	}
 }

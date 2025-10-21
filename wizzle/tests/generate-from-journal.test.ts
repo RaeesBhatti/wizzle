@@ -166,15 +166,17 @@ describe('generateFromJournal', () => {
 		const fs = require('fs');
 		const path = require('path');
 
-		// Copy journal-based fixtures to temp folder
+		// Copy journal-based fixtures to source folder
 		const sourceFolder = 'tests/fixtures/journal-based';
-		fs.cpSync(sourceFolder, tempFolder, { recursive: true });
+		const sourceTempFolder = createTempMigrationFolder('test-migrate-all-source');
+		fs.cpSync(sourceFolder, sourceTempFolder, { recursive: true });
 
 		// Verify no new-format folders exist before migration
 		expect(countMigrationFolders(tempFolder)).toBe(0);
 
 		// Perform migration
 		await generateFromJournal({
+			source: sourceTempFolder,
 			out: tempFolder,
 			dryRun: false,
 		});
@@ -195,10 +197,13 @@ describe('generateFromJournal', () => {
 		const firstSql = readSql(tempFolder, '1700000000000_first');
 		expect(firstSql).toContain('CREATE TABLE IF NOT EXISTS "users"');
 
-		// Verify old files are still present
-		expect(existsSync(join(tempFolder, 'meta', '_journal.json'))).toBe(true);
-		expect(existsSync(join(tempFolder, '0000_first.sql'))).toBe(true);
-		expect(existsSync(join(tempFolder, 'meta', '0000_snapshot.json'))).toBe(true);
+		// Verify old files are still present in source folder
+		expect(existsSync(join(sourceTempFolder, 'meta', '_journal.json'))).toBe(true);
+		expect(existsSync(join(sourceTempFolder, '0000_first.sql'))).toBe(true);
+		expect(existsSync(join(sourceTempFolder, 'meta', '0000_snapshot.json'))).toBe(true);
+
+		// Clean up source folder
+		cleanupMigrationFolder(sourceTempFolder);
 	});
 
 	test('dry run does not create files', async () => {
@@ -211,6 +216,7 @@ describe('generateFromJournal', () => {
 
 		// Perform dry run
 		await generateFromJournal({
+			source: tempFolder,
 			out: tempFolder,
 			dryRun: true,
 		});
@@ -245,6 +251,7 @@ describe('generateFromJournal', () => {
 
 		// Perform migration
 		await generateFromJournal({
+			source: tempFolder,
 			out: tempFolder,
 			dryRun: false,
 		});
@@ -262,6 +269,7 @@ describe('generateFromJournal', () => {
 		fs.cpSync(sourceFolder, tempFolder, { recursive: true });
 
 		await generateFromJournal({
+			source: tempFolder,
 			out: tempFolder,
 			dryRun: false,
 		});
@@ -278,6 +286,7 @@ describe('generateFromJournal', () => {
 		// Expect the migration to exit with error
 		await expect(
 			generateFromJournal({
+				source: tempFolder,
 				out: tempFolder,
 				dryRun: false,
 			}),
@@ -293,6 +302,7 @@ describe('generateFromJournal', () => {
 		fs.cpSync(sourceFolder, tempFolder, { recursive: true });
 
 		await generateFromJournal({
+			source: tempFolder,
 			out: tempFolder,
 			dryRun: false,
 		});
@@ -315,6 +325,7 @@ describe('generateFromJournal', () => {
 		fs.cpSync(sourceFolder, tempFolder, { recursive: true });
 
 		await generateFromJournal({
+			source: tempFolder,
 			out: tempFolder,
 			dryRun: false,
 		});
