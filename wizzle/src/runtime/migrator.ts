@@ -118,6 +118,34 @@ interface LegacyDrizzleConfig {
  */
 let cachedLegacyConfig: LegacyDrizzleConfig | undefined | null = null;
 
+/**
+ * Reset the cached legacy config (for testing purposes)
+ * @internal
+ */
+export function resetLegacyConfigCache(): void {
+	cachedLegacyConfig = null;
+
+	// Clear Node's require cache for all drizzle.config files
+	// We iterate over all cache keys and delete any that match our config paths
+	const prefix = process.env.TEST_CONFIG_PATH_PREFIX || '';
+	const extensions = ['ts', 'js', 'mjs', 'cjs', 'json'];
+
+	for (const ext of extensions) {
+		const configFileName = `drizzle.config.${ext}`;
+		const configPath = path.resolve(prefix, configFileName);
+
+		// Delete from cache using both normalized and non-normalized paths
+		delete require.cache[configPath];
+
+		// Also check all cache keys for matches
+		for (const key of Object.keys(require.cache)) {
+			if (key.endsWith(configFileName) || key === configPath) {
+				delete require.cache[key];
+			}
+		}
+	}
+}
+
 export function readLegacyDrizzleConfig(): LegacyDrizzleConfig | undefined {
 	// Return cached result if already read
 	if (cachedLegacyConfig !== null) {
