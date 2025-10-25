@@ -1,7 +1,8 @@
 import { sql } from 'drizzle-orm';
 import type { PgRemoteDatabase } from 'drizzle-orm/pg-proxy';
+import { migrateOldMigrationTable } from '../migration-table-migrator';
 import type { MigrationConfig } from '../migrator';
-import { readMigrationFiles } from '../migrator';
+import { readLegacyDrizzleConfig, readMigrationFiles } from '../migrator';
 
 export type ProxyMigrator = (migrationQueries: string[]) => Promise<void>;
 
@@ -11,6 +12,26 @@ export async function migrate<TSchema extends Record<string, unknown>>(
 	config: MigrationConfig,
 ) {
 	const migrations = readMigrationFiles(config);
+
+	const migrationsTable = config.migrationsTable ?? '__wizzle_migrations';
+	const migrationsSchema = config.migrationsSchema ?? 'wizzle';
+
+	// Automatic migration from old drizzle table to new wizzle table
+	const legacyConfig = readLegacyDrizzleConfig();
+	const oldTable = legacyConfig?.migrations?.table || '__drizzle_migrations';
+	const oldSchema = legacyConfig?.migrations?.schema || 'drizzle';
+
+	// Helper function to execute SQL
+	const executor = async (query: string) => {
+		return db.execute(sql.raw(query));
+	};
+
+	await migrateOldMigrationTable(executor, 'postgresql', {
+		newTable: migrationsTable,
+		newSchema: migrationsSchema,
+		oldTable,
+		oldSchema,
+	});
 
 	// Note: The 'tag' column is for debugging/readability only.
 	// Migration logic uses only 'created_at' to determine which migrations to apply.

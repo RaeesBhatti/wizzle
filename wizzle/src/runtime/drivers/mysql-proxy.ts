@@ -1,7 +1,8 @@
 import { sql } from 'drizzle-orm';
 import type { MySqlRemoteDatabase } from 'drizzle-orm/mysql-proxy';
+import { migrateOldMigrationTable } from '../migration-table-migrator';
 import type { MigrationConfig } from '../migrator';
-import { readMigrationFiles } from '../migrator';
+import { readLegacyDrizzleConfig, readMigrationFiles } from '../migrator';
 
 export type ProxyMigrator = (migrationQueries: string[]) => Promise<void>;
 
@@ -13,6 +14,21 @@ export async function migrate<TSchema extends Record<string, unknown>>(
 	const migrations = readMigrationFiles(config);
 
 	const migrationsTable = config.migrationsTable ?? '__wizzle_migrations';
+
+	// Automatic migration from old drizzle table to new wizzle table
+	const legacyConfig = readLegacyDrizzleConfig();
+	const oldTable = legacyConfig?.migrations?.table || '__drizzle_migrations';
+
+	// Helper function to execute SQL
+	const executor = async (query: string) => {
+		return db.execute(sql.raw(query));
+	};
+
+	await migrateOldMigrationTable(executor, 'mysql', {
+		newTable: migrationsTable,
+		oldTable,
+	});
+
 	// Note: The 'tag' column is for debugging/readability only.
 	// Migration logic uses only 'created_at' to determine which migrations to apply.
 	const migrationTableCreate = sql`

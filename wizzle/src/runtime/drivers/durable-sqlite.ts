@@ -1,6 +1,8 @@
 import { sql } from 'drizzle-orm';
 import type { DrizzleSqliteDODatabase } from 'drizzle-orm/durable-sqlite';
+import { migrateOldMigrationTable } from '../migration-table-migrator';
 import type { MigrationMeta } from '../migrator';
+import { readLegacyDrizzleConfig } from '../migrator';
 
 interface MigrationConfig {
 	journal: {
@@ -46,6 +48,20 @@ export async function migrate<
 	config: MigrationConfig,
 ): Promise<void> {
 	const migrations = readMigrationFiles(config);
+
+	// Automatic migration from old drizzle table to new wizzle table
+	const legacyConfig = readLegacyDrizzleConfig();
+	const oldTable = legacyConfig?.migrations?.table || '__drizzle_migrations';
+
+	// Helper function to execute SQL
+	const executor = async (query: string) => {
+		return db.run(sql.raw(query));
+	};
+
+	await migrateOldMigrationTable(executor, 'sqlite', {
+		newTable: '__wizzle_migrations',
+		oldTable,
+	});
 
 	db.transaction((tx) => {
 		try {

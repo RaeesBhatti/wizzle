@@ -1,7 +1,8 @@
 import { type SQL, sql } from 'drizzle-orm';
 import type { NeonHttpDatabase } from 'drizzle-orm/neon-http';
+import { migrateOldMigrationTable } from '../migration-table-migrator';
 import type { DrizzleInternal, MigrationConfig } from '../migrator';
-import { readMigrationFiles } from '../migrator';
+import { readLegacyDrizzleConfig, readMigrationFiles } from '../migrator';
 
 /**
  * This function reads migrationFolder and execute each unapplied migration and mark it as executed in database
@@ -19,6 +20,24 @@ export async function migrate<TSchema extends Record<string, unknown>>(
 	const internal = db as unknown as DrizzleInternal;
 	const migrationsTable = config.migrationsTable ?? '__wizzle_migrations';
 	const migrationsSchema = config.migrationsSchema ?? 'wizzle';
+
+	// Automatic migration from old drizzle table to new wizzle table
+	const legacyConfig = readLegacyDrizzleConfig();
+	const oldTable = legacyConfig?.migrations?.table || '__drizzle_migrations';
+	const oldSchema = legacyConfig?.migrations?.schema || 'drizzle';
+
+	// Helper function to execute SQL
+	const executor = async (query: string) => {
+		return internal.session.execute(sql.raw(query));
+	};
+
+	await migrateOldMigrationTable(executor, 'postgresql', {
+		newTable: migrationsTable,
+		newSchema: migrationsSchema,
+		oldTable,
+		oldSchema,
+	});
+
 	// Note: The 'tag' column is for debugging/readability only.
 	// Migration logic uses only 'created_at' to determine which migrations to apply.
 	const migrationTableCreate = sql`

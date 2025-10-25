@@ -1,7 +1,8 @@
 import { sql } from 'drizzle-orm';
 import type { DrizzleD1Database } from 'drizzle-orm/d1';
+import { migrateOldMigrationTable } from '../migration-table-migrator';
 import type { DrizzleInternal, MigrationConfig } from '../migrator';
-import { readMigrationFiles } from '../migrator';
+import { readLegacyDrizzleConfig, readMigrationFiles } from '../migrator';
 
 export async function migrate<TSchema extends Record<string, unknown>>(
 	db: DrizzleD1Database<TSchema>,
@@ -10,6 +11,20 @@ export async function migrate<TSchema extends Record<string, unknown>>(
 	const migrations = readMigrationFiles(config);
 	const internal = db as unknown as DrizzleInternal;
 	const migrationsTable = config.migrationsTable ?? '__wizzle_migrations';
+
+	// Automatic migration from old drizzle table to new wizzle table
+	const legacyConfig = readLegacyDrizzleConfig();
+	const oldTable = legacyConfig?.migrations?.table || '__drizzle_migrations';
+
+	// Helper function to execute SQL
+	const executor = async (query: string) => {
+		return internal.session.run(sql.raw(query));
+	};
+
+	await migrateOldMigrationTable(executor, 'sqlite', {
+		newTable: migrationsTable,
+		oldTable,
+	});
 
 	// Note: The 'tag' column is for debugging/readability only.
 	// Migration logic uses only 'created_at' to determine which migrations to apply.

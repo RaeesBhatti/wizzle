@@ -11,7 +11,7 @@ import { assertV1OutFolder } from '../utils';
 import { certs } from '../utils/certs';
 import { checkHandler } from './commands/check';
 import { dropMigration } from './commands/drop';
-import { generateFromJournal } from './commands/generate-from-journal';
+import { initCommand } from './commands/init';
 import { upMysqlHandler } from './commands/mysqlUp';
 import { upPgHandler } from './commands/pgUp';
 import { upSinglestoreHandler } from './commands/singlestoreUp';
@@ -37,7 +37,7 @@ const optionDialect = string('dialect')
 		`Database dialect: 'gel', 'postgresql', 'mysql', 'sqlite', 'turso' or 'singlestore'`,
 	);
 const optionOut = string().desc("Output folder, 'wizzle' by default");
-const optionConfig = string().desc('Path to drizzle config file');
+const optionConfig = string().desc('Path to wizzle config file');
 const optionBreakpoints = boolean().desc(
 	`Prepare SQL statements with breakpoints`,
 );
@@ -650,25 +650,12 @@ export const drop = command({
 	},
 });
 
-export const generateFromJournalCommand = command({
-	name: 'generate-from-journal',
-	desc: 'Generate folder-based migrations from journal-based structure',
-	options: {
-		source: string().desc('Source folder with journal-based migrations').default('drizzle'),
-		out: optionOut.default('wizzle'),
-		dryRun: boolean()
-			.desc('Show what would be generated without making changes')
-			.default(false),
-		casing: string('introspect-casing').enum('camel', 'preserve').default('camel')
-			.desc('Casing for generated schema files'),
-	},
-	handler: async (opts) => {
-		await generateFromJournal({
-			source: opts.source,
-			out: opts.out,
-			dryRun: opts.dryRun,
-			casing: opts.casing as 'camel' | 'preserve',
-		});
+export const init = command({
+	name: 'init',
+	desc: 'Initialize wizzle by creating wizzle.config from drizzle.config',
+	options: {},
+	handler: async () => {
+		await initCommand();
 	},
 });
 

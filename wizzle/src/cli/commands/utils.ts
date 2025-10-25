@@ -879,17 +879,19 @@ export const drizzleConfigFromFile = async (
 ): Promise<CliConfig> => {
 	const prefix = process.env.TEST_CONFIG_PATH_PREFIX || '';
 
-	const defaultTsConfigExists = existsSync(resolve(join(prefix, 'drizzle.config.ts')));
-	const defaultJsConfigExists = existsSync(resolve(join(prefix, 'drizzle.config.js')));
-	const defaultJsonConfigExists = existsSync(
-		join(resolve('drizzle.config.json')),
-	);
+	// Check for wizzle.config files
+	const wizzleConfigExtensions = ['ts', 'js', 'mjs', 'cjs', 'json'];
+	let wizzleConfigPath: string | undefined;
 
-	const defaultConfigPath = defaultTsConfigExists
-		? 'drizzle.config.ts'
-		: defaultJsConfigExists
-		? 'drizzle.config.js'
-		: 'drizzle.config.json';
+	for (const ext of wizzleConfigExtensions) {
+		const testPath = resolve(join(prefix, `wizzle.config.${ext}`));
+		if (existsSync(testPath)) {
+			wizzleConfigPath = `wizzle.config.${ext}`;
+			break;
+		}
+	}
+
+	const defaultConfigPath = wizzleConfigPath || 'wizzle.config.ts';
 
 	if (!configPath && !isExport) {
 		console.log(
@@ -902,7 +904,15 @@ export const drizzleConfigFromFile = async (
 	const path: string = resolve(join(prefix, configPath ?? defaultConfigPath));
 
 	if (!existsSync(path)) {
-		console.log(`${path} file does not exist`);
+		// If wizzle.config doesn't exist, provide helpful error message
+		if (!configPath && !wizzleConfigPath) {
+			console.log(chalk.red('\n❌ wizzle.config not found\n'));
+			console.log(chalk.yellow('Run the following command to create wizzle.config:\n'));
+			console.log(chalk.cyan('  wizzle init\n'));
+			console.log(chalk.gray('This will copy your drizzle.config or create a new config file.\n'));
+		} else {
+			console.log(chalk.red(`\n❌ Config file not found: ${path}\n`));
+		}
 		process.exit(1);
 	}
 
