@@ -61,7 +61,7 @@ CREATE INDEX IF NOT EXISTS users_full_name_index ON users (full_name);
 ### Installation & configuration
 
 ```shell
-npm install -D wizzle
+npm install -D wizzle-cli
 ```
 
 Running with CLI options:
@@ -70,7 +70,7 @@ Running with CLI options:
 // package.json
 {
  "scripts": {
-  "generate": "wizzle generate --out migrations-folder --schema src/db/schema.ts"
+  "generate": "wizzle-cli generate --out migrations-folder --schema src/db/schema.ts"
  }
 }
 ```
@@ -113,7 +113,7 @@ Unlike drizzle-orm's runtime migrator which relies on `_journal.json`, wizzle's 
 ### Installation
 
 ```bash
-npm install wizzle drizzle-orm
+npm install wizzle-cli drizzle-orm
 ```
 
 ### Usage
@@ -124,7 +124,7 @@ Import the migrator for your database driver and call it with your drizzle datab
 
 ```typescript
 import { drizzle } from 'drizzle-orm/node-postgres';
-import { migrate } from 'wizzle/migrator/node-postgres';
+import { migrate } from 'wizzle-cli/migrator/node-postgres';
 import { Pool } from 'pg';
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -138,7 +138,7 @@ await migrate(db, { migrationsFolder: './drizzle' });
 
 ```typescript
 import { drizzle } from 'drizzle-orm/postgres-js';
-import { migrate } from 'wizzle/migrator/postgres-js';
+import { migrate } from 'wizzle-cli/migrator/postgres-js';
 import postgres from 'postgres';
 
 const sql = postgres(process.env.DATABASE_URL, { max: 1 });
@@ -151,7 +151,7 @@ await migrate(db, { migrationsFolder: './drizzle' });
 
 ```typescript
 import { drizzle } from 'drizzle-orm/mysql2';
-import { migrate } from 'wizzle/migrator/mysql2';
+import { migrate } from 'wizzle-cli/migrator/mysql2';
 import mysql from 'mysql2/promise';
 
 const connection = await mysql.createConnection(process.env.DATABASE_URL);
@@ -164,7 +164,7 @@ await migrate(db, { migrationsFolder: './drizzle' });
 
 ```typescript
 import { drizzle } from 'drizzle-orm/better-sqlite3';
-import { migrate } from 'wizzle/migrator/better-sqlite3';
+import { migrate } from 'wizzle-cli/migrator/better-sqlite3';
 import Database from 'better-sqlite3';
 
 const sqlite = new Database('sqlite.db');
@@ -177,7 +177,7 @@ await migrate(db, { migrationsFolder: './drizzle' });
 
 ```typescript
 import { drizzle } from 'drizzle-orm/libsql';
-import { migrate } from 'wizzle/migrator/libsql';
+import { migrate } from 'wizzle-cli/migrator/libsql';
 import { createClient } from '@libsql/client';
 
 const client = createClient({ url: 'file:local.db' });
@@ -191,37 +191,37 @@ await migrate(db, { migrationsFolder: './drizzle' });
 Wizzle supports all major database drivers:
 
 #### PostgreSQL
-- `wizzle/migrator/node-postgres` - node-postgres (pg)
-- `wizzle/migrator/postgres-js` - postgres.js
-- `wizzle/migrator/neon-serverless` - Neon serverless
-- `wizzle/migrator/neon-http` - Neon HTTP
-- `wizzle/migrator/pglite` - PGlite
-- `wizzle/migrator/pg-proxy` - PostgreSQL proxy
-- `wizzle/migrator/vercel-postgres` - Vercel Postgres
-- `wizzle/migrator/xata-http` - Xata HTTP
-- `wizzle/migrator/aws-data-api-pg` - AWS Data API for PostgreSQL
+- `wizzle-cli/migrator/node-postgres` - node-postgres (pg)
+- `wizzle-cli/migrator/postgres-js` - postgres.js
+- `wizzle-cli/migrator/neon-serverless` - Neon serverless
+- `wizzle-cli/migrator/neon-http` - Neon HTTP
+- `wizzle-cli/migrator/pglite` - PGlite
+- `wizzle-cli/migrator/pg-proxy` - PostgreSQL proxy
+- `wizzle-cli/migrator/vercel-postgres` - Vercel Postgres
+- `wizzle-cli/migrator/xata-http` - Xata HTTP
+- `wizzle-cli/migrator/aws-data-api-pg` - AWS Data API for PostgreSQL
 
 #### MySQL
-- `wizzle/migrator/mysql2` - mysql2
-- `wizzle/migrator/mysql-proxy` - MySQL proxy
-- `wizzle/migrator/planetscale-serverless` - PlanetScale serverless
-- `wizzle/migrator/tidb-serverless` - TiDB serverless
+- `wizzle-cli/migrator/mysql2` - mysql2
+- `wizzle-cli/migrator/mysql-proxy` - MySQL proxy
+- `wizzle-cli/migrator/planetscale-serverless` - PlanetScale serverless
+- `wizzle-cli/migrator/tidb-serverless` - TiDB serverless
 
 #### SQLite
-- `wizzle/migrator/better-sqlite3` - better-sqlite3
-- `wizzle/migrator/libsql` - libSQL
-- `wizzle/migrator/bun-sqlite` - Bun SQLite
-- `wizzle/migrator/bun-sql` - Bun SQL
-- `wizzle/migrator/sqlite-proxy` - SQLite proxy
-- `wizzle/migrator/sql-js` - sql.js
-- `wizzle/migrator/d1` - Cloudflare D1
-- `wizzle/migrator/durable-sqlite` - Durable SQLite
-- `wizzle/migrator/expo-sqlite` - Expo SQLite
-- `wizzle/migrator/op-sqlite` - OP SQLite
+- `wizzle-cli/migrator/better-sqlite3` - better-sqlite3
+- `wizzle-cli/migrator/libsql` - libSQL
+- `wizzle-cli/migrator/bun-sqlite` - Bun SQLite
+- `wizzle-cli/migrator/bun-sql` - Bun SQL
+- `wizzle-cli/migrator/sqlite-proxy` - SQLite proxy
+- `wizzle-cli/migrator/sql-js` - sql.js
+- `wizzle-cli/migrator/d1` - Cloudflare D1
+- `wizzle-cli/migrator/durable-sqlite` - Durable SQLite
+- `wizzle-cli/migrator/expo-sqlite` - Expo SQLite
+- `wizzle-cli/migrator/op-sqlite` - OP SQLite
 
 #### SingleStore
-- `wizzle/migrator/singlestore` - SingleStore
-- `wizzle/migrator/singlestore-proxy` - SingleStore proxy
+- `wizzle-cli/migrator/singlestore` - SingleStore
+- `wizzle-cli/migrator/singlestore-proxy` - SingleStore proxy
 
 ### Migration Configuration
 
@@ -268,7 +268,7 @@ import { migrate } from 'drizzle-orm/node-postgres/migrator';
 
 **After (wizzle):**
 ```typescript
-import { migrate } from 'wizzle/migrator/node-postgres';
+import { migrate } from 'wizzle-cli/migrator/node-postgres';
 ```
 
 The API remains identical - only the import path changes.

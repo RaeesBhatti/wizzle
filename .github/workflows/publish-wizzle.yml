@@ -1,4 +1,4 @@
-name: Publish Wizzle to NPM
+name: Publish Wizzle CLI to NPM
 
 on:
   release:
@@ -38,14 +38,14 @@ jobs:
 
       - name: Build package
         working-directory: ./wizzle
-        run: pnpm build
+        run: pnpm build:dev
 
       - name: Pack package
         working-directory: ./wizzle
-        run: pnpm pack
+        run: pnpm run pack
 
       - name: Publish to NPM
         working-directory: ./wizzle
-        run: npm publish package.tgz --provenance --access public
+        run: npm publish package.tgz --provenance --access public --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -1,5 +1,5 @@
 {
-	"name": "wizzle",
+	"name": "wizzle-cli",
 	"version": "0.31.5",
 	"description": "Experimental fork of drizzle-kit for custom modifications",
 	"homepage": "https://orm.drizzle.team",
@@ -27,10 +27,13 @@
 		"type": "git",
 		"url": "git+https://github.com/drizzle-team/drizzle-orm.git"
 	},
-	"author": "Drizzle Team",
+	"author": {
+		"name": "Raees Iqbal",
+		"url": "https://raees.me"
+	},
 	"license": "MIT",
 	"bin": {
-		"wizzle": "./bin.cjs"
+		"wizzle-cli": "./bin.cjs"
 	},
 	"scripts": {
 		"api": "tsx ./dev/api.ts",
