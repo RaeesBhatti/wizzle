@@ -1,8 +1,8 @@
-## Wizzle
+## Wizzle CLI
 
 Wizzle is an experimental fork of Drizzle Kit - a CLI migrator tool for Drizzle ORM. It is probably the one and only tool that lets you completely automatically generate SQL migrations and covers ~95% of the common cases like deletions and renames by prompting user input.
 
-**Note**: This is a custom fork for experimental modifications. For the official version, see [drizzle-kit](https://github.com/drizzle-team/drizzle-orm).
+**Note**: This is a custom fork for experimental modifications. The package is published as `wizzle-cli` on npm. For the official version, see [drizzle-kit](https://github.com/drizzle-team/drizzle-orm).
 
 ## Documentation
 
@@ -230,8 +230,8 @@ The `migrate` function accepts a configuration object:
 ```typescript
 interface MigrationConfig {
   migrationsFolder: string;      // Path to migrations folder (required)
-  migrationsTable?: string;       // Custom migrations table name (default: "__drizzle_migrations")
-  migrationsSchema?: string;      // Schema for migrations table (PostgreSQL only)
+  migrationsTable?: string;       // Custom migrations table name (default: "__wizzle_migrations")
+  migrationsSchema?: string;      // Schema for migrations table (PostgreSQL only, default: "wizzle")
 }
 ```
 
