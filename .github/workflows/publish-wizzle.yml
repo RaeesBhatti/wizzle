@@ -1,0 +1,51 @@
+name: Publish Wizzle to NPM
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:  # Allows manual trigger from GitHub Actions UI
+
+jobs:
+  publish:
+    name: Publish to NPM
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write  # Required for npm provenance
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.6.3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run tests
+        working-directory: ./wizzle
+        run: pnpm test
+
+      - name: Build package
+        working-directory: ./wizzle
+        run: pnpm build
+
+      - name: Pack package
+        working-directory: ./wizzle
+        run: pnpm pack
+
+      - name: Publish to NPM
+        working-directory: ./wizzle
+        run: npm publish package.tgz --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
